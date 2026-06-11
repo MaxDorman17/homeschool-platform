@@ -35,6 +35,8 @@ app.include_router(schedules.router)
 app.include_router(progress.router)
 app.include_router(dashboard.router)
 app.include_router(rewards.router)
+app.include_router(subjects.router)
+app.include_router(units.router)
 
 
 @app.get("/api/v1/health")

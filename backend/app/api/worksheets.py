@@ -6,7 +6,7 @@ import os, uuid, shutil
 
 from app.config import get_settings
 from app.database import get_db
-from app.models import User, Worksheet, UserRole, WorksheetType
+from app.models import User, Worksheet, UserRole, WorksheetType, Subject, Unit
 from app.schemas import WorksheetCreate, WorksheetResponse
 from app.auth import get_current_user, require_parent, require_child
 
@@ -15,6 +15,13 @@ router = APIRouter(prefix="/api/v1/worksheets", tags=["Worksheets"])
 
 
 def worksheet_to_response(ws: Worksheet) -> dict:
+    subject_name = None
+    unit_name = None
+    if ws.subject_id:
+        subject_name = ws.subject.name if ws.subject else None
+    if ws.unit_id:
+        unit_name = ws.unit.name if ws.unit else None
+
     base = {
         "id": ws.id,
         "title": ws.title,
@@ -26,41 +33,50 @@ def worksheet_to_response(ws: Worksheet) -> dict:
         "created_by": ws.created_by,
         "created_at": ws.created_at,
         "questions": ws.questions,
+        "subject_id": ws.subject_id,
+        "unit_id": ws.unit_id,
+        "subject_name": subject_name,
+        "unit_name": unit_name,
     }
     return base
 
 
 @router.post("", response_model=WorksheetResponse, status_code=201)
 def create_worksheet(
-    title: str = Form(...),
-    description: Optional[str] = Form(None),
-    worksheet_type: str = Form("uploaded"),
-    questions: Optional[str] = Form(None),
+    payload: WorksheetCreate,
     current_user: User = Depends(require_parent),
     db: Session = Depends(get_db),
 ):
     """Create a new worksheet."""
-    import json
-
     parsed_questions = None
-    if questions:
-        try:
-            parsed_questions = json.loads(questions)
-        except json.JSONDecodeError:
-            parsed_questions = None
+    if payload.questions is not None:
+        parsed_questions = [q.model_dump() if hasattr(q, "model_dump") else q.dict() for q in payload.questions]
+
+    subject = None
+    unit = None
+    if payload.subject_id is not None:
+        subject = db.query(Subject).filter(Subject.id == payload.subject_id).first()
+        if not subject:
+            raise HTTPException(status_code=404, detail="Subject not found")
+    if payload.unit_id is not None:
+        unit = db.query(Unit).filter(Unit.id == payload.unit_id).first()
+        if not unit or unit.subject_id != (payload.subject_id or unit.subject_id):
+            raise HTTPException(status_code=404, detail="Unit not found for subject")
 
     ws = Worksheet(
-        title=title,
-        description=description,
-        worksheet_type=WorksheetType(worksheet_type),
+        title=payload.title,
+        description=payload.description,
+        worksheet_type=WorksheetType(payload.worksheet_type),
         questions=parsed_questions,
         points_reward=5,
         created_by=current_user.id,
+        subject_id=payload.subject_id,
+        unit_id=payload.unit_id,
     )
     db.add(ws)
     db.commit()
     db.refresh(ws)
-    return worksheet_to_response(ws)
+    return ws
 
 
 @router.post("/upload/{worksheet_id}", response_model=dict, status_code=200)

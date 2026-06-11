@@ -178,6 +178,8 @@ class WorksheetCreate(BaseModel):
     description: Optional[str] = None
     worksheet_type: WorksheetType = WorksheetType.UPLOADED
     questions: Optional[List[QuestionItem]] = None
+    subject_id: Optional[int] = None
+    unit_id: Optional[int] = None
 
 
 class WorksheetResponse(BaseModel):
@@ -187,12 +189,25 @@ class WorksheetResponse(BaseModel):
     worksheet_type: str
     file_path: Optional[str] = None
     file_url: Optional[str] = None
+    subject_id: Optional[int] = None
+    unit_id: Optional[int] = None
+    subject_name: Optional[str] = None
+    unit_title: Optional[str] = None
     points_reward: int
     created_by: int
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class WorksheetUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    worksheet_type: Optional[WorksheetType] = None
+    questions: Optional[List[QuestionItem]] = None
+    subject_id: Optional[int] = None
+    unit_id: Optional[int] = None
 
 
 # ─── Quiz Schemas ───

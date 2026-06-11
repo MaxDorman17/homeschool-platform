@@ -883,6 +883,18 @@
                     <textarea id="worksheetDescription" rows="2" placeholder="Brief description"></textarea>
                 </div>
                 <div class="form-group">
+                    <label>Subject</label>
+                    <select id="worksheetSubject" onchange="loadWorksheetUnits()">
+                        <option value="">Select subject...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Unit</label>
+                    <select id="worksheetUnit">
+                        <option value="">Select unit...</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Worksheet Type</label>
                     <select id="worksheetType" onchange="toggleWorksheetType()">
                         <option value="uploaded">Uploaded (PDF/Image)</option>
@@ -1145,6 +1157,67 @@
                 select.innerHTML += `<option value="${child.id}">${child.full_name}</option>`;
             });
         }
+
+        async function loadSubjectUnitsForFilter() {
+            try {
+                const subjects = await apiGet('/api/v1/subjects');
+                if (!Array.isArray(subjects)) return [];
+
+                const withUnits = await Promise.all(
+                    subjects.map(async s => {
+                        try {
+                            const units = await apiGet(`/api/v1/subjects/${s.id}/units`);
+                            return { ...s, units: Array.isArray(units) ? units : [] };
+                        } catch {
+                            return { ...s, units: [] };
+                        }
+                    })
+                );
+                return withUnits;
+            } catch {
+                return [];
+            }
+        }
+
+        window.loadSubjectsToWorksheetForm = async function () {
+            try {
+                const subjects = await apiGet('/api/v1/subjects');
+                const subjectSelect = document.getElementById('worksheetSubject');
+                const unitSelect = document.getElementById('worksheetUnit');
+                if (!subjectSelect) return;
+
+                subjectSelect.innerHTML = '<option value="">Select subject...</option>';
+                unitSelect.innerHTML = '<option value="">Select unit...</option>';
+
+                if (!Array.isArray(subjects)) return;
+
+                subjects.forEach(s => {
+                    subjectSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                });
+            } catch (err) {
+                console.error('Failed to load subjects:', err);
+            }
+        };
+
+        window.loadWorksheetUnits = async function () {
+            const subjectId = document.getElementById('worksheetSubject').value;
+            const unitSelect = document.getElementById('worksheetUnit');
+            if (!unitSelect) return;
+
+            unitSelect.innerHTML = '<option value="">Select unit...</option>';
+
+            if (!subjectId) return;
+
+            try {
+                const units = await apiGet(`/api/v1/subjects/${subjectId}/units`);
+                if (!Array.isArray(units)) return;
+                units.forEach(u => {
+                    unitSelect.innerHTML += `<option value="${u.id}">${u.name}</option>`;
+                });
+            } catch (err) {
+                console.error('Failed to load units:', err);
+            }
+        };
 
         // ─── Weekly Planner Functions ───
         const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -1590,6 +1663,7 @@
                         <div>
                             <div class="lesson-subject">${ws.worksheet_type === 'interactive' ? 'Interactive' : 'Uploaded'}</div>
                             <div class="lesson-title">${ws.title}</div>
+                            ${ws.subject_name || ws.unit_name ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;">${ws.subject_name || ''}${ws.unit_name ? ' · ' + ws.unit_name : ''}</div>` : ''}
                         </div>
                     </div>
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;">

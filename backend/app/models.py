@@ -144,6 +144,8 @@ class Worksheet(Base):
     worksheet_type = Column(Enum(WorksheetType), default=WorksheetType.UPLOADED)
     file_path = Column(String(500), nullable=True)  # For uploaded PDFs/images
     questions = Column(JSON, nullable=True)  # For interactive worksheets
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=True)
+    unit_id = Column(Integer, ForeignKey("units.id"), nullable=True)
     points_reward = Column(Integer, default=5)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

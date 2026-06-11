@@ -276,7 +276,6 @@ class Reward(Base):
 
 class RewardRedemption(Base):
     __tablename__ = "reward_redemptions"
-
     id = Column(Integer, primary_key=True, index=True)
     child_id = Column(Integer, ForeignKey("child_profiles.id"), nullable=False)
     reward_id = Column(Integer, ForeignKey("rewards.id"), nullable=False)
@@ -285,6 +284,32 @@ class RewardRedemption(Base):
 
     child = relationship("ChildProfile")
     reward = relationship("Reward", back_populates="redemptions")
+
+
+class Subject(Base):
+    __tablename__ = "subjects"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), unique=True, nullable=False)
+    description = Column(Text, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    creator = relationship("User")
+    units = relationship("Unit", back_populates="subject", cascade="all, delete-orphan")
+
+
+class Unit(Base):
+    __tablename__ = "units"
+
+    id = Column(Integer, primary_key=True, index=True)
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=True)
+    order_index = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    subject = relationship("Subject", back_populates="units")
 
 
 class UserBadge(Base):

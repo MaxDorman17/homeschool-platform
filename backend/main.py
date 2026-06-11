@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 
 from app.database import init_db
-from app.api import auth, lessons, worksheets, quizzes, schedules, progress, dashboard, rewards
+from app.api import auth, lessons, worksheets, quizzes, schedules, progress, dashboard, rewards, subjects, units
 
 # Create app
 app = FastAPI(

@@ -439,3 +439,39 @@ class MessageResponse(BaseModel):
 
 class BulkCompleteRequest(BaseModel):
     item_ids: List[int]  # Schedule item IDs to mark complete
+
+
+# ─── Subject/Unit Schemas ───
+
+class SubjectCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+
+class SubjectResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    created_by: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class UnitCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    order_index: Optional[int] = 0
+
+
+class UnitResponse(BaseModel):
+    id: int
+    subject_id: int
+    title: str
+    description: Optional[str] = None
+    order_index: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

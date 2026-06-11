@@ -1,0 +1,56 @@
+:root {
+  --bg: #050505;
+  --text: #f5f5f5;
+  --accent: #f59e0b;
+  --panel: rgba(10, 10, 10, 0.65);
+  --border: rgba(245, 158, 11, 0.25);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: radial-gradient(circle at 50% -20%, #1e1b4b, #000 60%) fixed;
+  color: var(--text);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Full-screen canvas */
+#c {
+  position: fixed;
+  inset: 0;
+  display: block;
+}
+
+/* Centered UI */
+.container {
+  position: relative;
+  z-index: 10;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  pointer-events: none;
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 200;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
+}
+
+p.tagline {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  font-weight: 300;
+}

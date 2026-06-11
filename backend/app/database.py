@@ -33,5 +33,6 @@ def get_db():
 def init_db():
     """Initialize the database - create all tables."""
     from app.models import User, ParentProfile, ChildProfile, Lesson, Worksheet, Quiz, Schedule, ScheduleItem, \
-        ProgressRecord, WorksheetSubmission, QuizResult, Reward, RewardRedemption, UserBadge, PointTransaction
+        ProgressRecord, WorksheetSubmission, QuizResult, Reward, RewardRedemption, UserBadge, PointTransaction, \
+        Subject, Unit
     Base.metadata.create_all(bind=engine)

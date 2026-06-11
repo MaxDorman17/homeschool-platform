@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Dashboard - Home School Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --card-border: rgba(99, 102, 241, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .navbar-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .navbar-links a:hover,
+        .navbar-links a.active {
+            color: var(--primary-light);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-primary { background: var(--primary); color: white; }
+        .badge-secondary { background: var(--secondary); color: white; }
+        .badge-accent { background: var(--accent); color: white; }
+        .badge-danger { background: var(--danger); color: white; }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--light);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: var(--light);
+        }
+
+        .lesson-card,
+        .worksheet-card,
+        .quiz-card,
+        .schedule-card {
+            margin-bottom: 1rem;
+        }
+
+        .lesson-subject {
+            font-size: 0.9rem;
+            color: var(--primary-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .lesson-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ─── Weekly Planner Styles ─── */
+        #planner-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .day-column {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1rem;
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .day-header h3 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .planner-slots {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .planner-slot {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .planner-slot:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .planner-slot.assigned {
+            border-left: 4px solid var(--secondary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .slot-number {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .slot-content {
+            min-height: 60px;
+        }
+
+        .slot-content .lesson-card-mini {
+            background: transparent;
+            padding: 0;
+            border: none;
+        }
+
+        .slot-content .lesson-card-mini .lesson-subject {
+            font-size: 0.8rem;
+            color: var(--primary-light);
+        }
+
+        .slot-content .lesson-card-mini .lesson-title {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .slot-content .lesson-card-mini .lesson-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .remove-lesson-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .remove-lesson-btn:hover {
+            background: #dc2626;
+        }
+
+        .progress-bar {
+            height: 0.5rem;
+            background: var(--border);
+            border-radius: 0.25rem;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--secondary);
+            transition: width 0.3s ease;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 2000;
+        }
+
+        .toast {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--secondary);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 1rem;
+        }
+
+        .child-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .child-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .child-info h3 {
+            margin-bottom: 0.25rem;
+        }
+
+        .child-info p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .schedule-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .schedule-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .schedule-item-title {
+            font-weight: 600;
+        }
+
+        .schedule-item-day {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .schedule-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .navbar-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                width: 95%;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">📚 Home School</a>
+        <div class="navbar-links">
+            <a href="#" class="active" onclick="showSection('overview')">Overview</a>
+            <a href="#" onclick="showSection('children')">Children</a>
+            <a href="#" onclick="showSection('lessons')">Lessons</a>
+            <a href="#" onclick="showSection('worksheets')">Worksheets</a>
+            <a href="#" onclick="showSection('quizzes')">Quizzes</a>
+            <a href="#" onclick="showSection('schedules')">Schedules</a>
+            <a href="#" onclick="showSection('rewards')">Rewards</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Overview Section -->
+        <div id="section-overview" class="section active">
+            <div class="section-header">
+                <h2>Dashboard Overview</h2>
+                <p>Welcome back! Here's what's happening with your children's learning.</p>
+            </div>
+
+            <div class="dashboard-grid grid-4">
+                <div class="card stat-card">
+                    <div class="stat-value" id="stat-children">0</div>
+                    <div class="stat-label">Children</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-value" id="stat-schedules">0</div>
+                    <div class="stat-label">Active Schedules</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-value" id="stat-lessons">0</div>
+                    <div class="stat-label">Total Lessons</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-value" id="stat-quizzes">0</div>
+                    <div class="stat-label">Quizzes Created</div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Activity</h3>
+                    </div>
+                    <div id="recent-activity">
+                        <p style="color: var(--text-muted);">No recent activity</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Weekly Progress</h3>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="weekly-progress" style="width: 0%"></div>
+                    </div>
+                    <p style="color: var(--text-muted); margin-top: 10px;" id="weekly-text">0% completion this week</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Children Section -->
+        <div id="section-children" class="section">
+            <div class="section-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2>Your Children</h2>
+                        <p>Manage your children's profiles and progress.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('addChildModal')">+ Add Child</button>
+                </div>
+            </div>
+            <div id="children-list" class="dashboard-grid grid-3">
+                <!-- Children will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Lessons Section - Weekly Planner -->
+        <div id="section-lessons" class="section">
+            <div class="section-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2>Weekly Planner 📅</h2>
+                        <p>Schedule lessons across the week. Mon-Thu: 5 lessons/day, Fri: 3 lessons.</p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="quickFillPlanner()">⚡ Quick Fill</button>
+                        <button class="btn btn-primary" onclick="openModal('addLessonModal')">+ Add Lesson</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Child Selector -->
+            <div class="form-group" style="max-width: 300px; margin-bottom: 2rem;">
+                <label>Select Child</label>
+                <select id="plannerChild" onchange="renderPlanner()">
+                    <option value="all">All Children</option>
+                    ${children.map(c => `<option value="${c.id}">${c.full_name}</option>`).join('')}
+                </select>
+            </div>
+
+            <!-- Weekly Planner Grid -->
+            <div id="planner-container">
+                ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((day, dayIndex) => `
+                    <div class="day-column" data-day="${dayIndex}">
+                        <div class="day-header">
+                            <h3>${day}</h3>
+                            <span class="badge badge-secondary">${dayIndex < 4 ? '5 slots' : '3 slots'}</span>
+                        </div>
+                        <div class="planner-slots" id="slots-${dayIndex}">
+                            ${Array(dayIndex < 4 ? 5 : 3).fill(null).map((_, slotIndex) => `
+                                <div class="planner-slot" data-day="${dayIndex}" data-slot="${slotIndex + 1}">
+                                    <div class="slot-number">Lesson ${slotIndex + 1}</div>
+                                    <div class="slot-content" id="slot-content-${dayIndex}-${slotIndex}">
+                                        <p style="color: var(--text-muted); font-size: 0.85rem;">No lesson assigned</p>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" style="width: 100%; margin-top: 0.5rem;" onclick="assignLessonToSlot(${dayIndex}, ${slotIndex})">
+                                        Assign Lesson
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <!-- Lesson List Below -->
+            <h3 style="margin: 2rem 0 1rem;">All Lessons</h3>
+            <div id="lessons-list" class="dashboard-grid grid-2">
+                <!-- Lessons will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Worksheets Section -->
+        <div id="section-worksheets" class="section">
+            <div class="section-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2>Worksheets</h2>
+                        <p>Create and manage worksheets for your children.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('addWorksheetModal')">+ Add Worksheet</button>
+                </div>
+            </div>
+            <div id="worksheets-list" class="dashboard-grid grid-2">
+                <!-- Worksheets will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Quizzes Section -->
+        <div id="section-quizzes" class="section">
+            <div class="section-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2>Quizzes</h2>
+                        <p>Create and manage quizzes for your children.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('addQuizModal')">+ Add Quiz</button>
+                </div>
+            </div>
+            <div id="quizzes-list" class="dashboard-grid grid-2">
+                <!-- Quizzes will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Schedules Section -->
+        <div id="section-schedules" class="section">
+            <div class="section-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2>Schedules</h2>
+                        <p>Create and manage learning schedules for your children.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('addScheduleModal')">+ Create Schedule</button>
+                </div>
+            </div>
+            <div id="schedules-list">
+                <!-- Schedules will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Rewards Section -->
+        <div id="section-rewards" class="section">
+            <div class="section-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2>Rewards</h2>
+                        <p>Manage rewards and point values for your children.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('addRewardModal')">+ Add Reward</button>
+                </div>
+            </div>
+            <div id="rewards-list" class="dashboard-grid grid-3">
+                <!-- Rewards will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Child Modal -->
+    <div class="modal-overlay" id="addChildModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add New Child</h3>
+                <button class="modal-close" onclick="closeModal('addChildModal')">&times;</button>
+            </div>
+            <form id="addChildForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="childFullName" required placeholder="Enter child's full name">
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="childUsername" required placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="childEmail" required placeholder="Enter child's email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="childPassword" required minlength="4" placeholder="Minimum 4 characters">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Add Child</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Lesson Modal -->
+    <div class="modal-overlay" id="addLessonModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Create New Lesson</h3>
+                <button class="modal-close" onclick="closeModal('addLessonModal')">&times;</button>
+            </div>
+            <form id="addLessonForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="lessonTitle" required placeholder="e.g., Introduction to Fractions">
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="lessonSubject" required placeholder="e.g., Math, Science, English">
+                </div>
+                <div class="form-group">
+                    <label>Topic (optional)</label>
+                    <input type="text" id="lessonTopic" placeholder="e.g., Basic Operations">
+                </div>
+                <div class="form-group">
+                    <label>Description / Instructions</label>
+                    <textarea id="lessonDescription" rows="4" placeholder="Enter lesson instructions or content"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Content Type</label>
+                    <select id="lessonType">
+                        <option value="text">Text / Instructions</option>
+                        <option value="video">Video</option>
+                        <option value="link">External Link</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>URL (for video/link types)</label>
+                    <input type="url" id="lessonUrl" placeholder="https://youtube.com/watch?v=...">
+                </div>
+                <div class="form-group">
+                    <label>Difficulty</label>
+                    <select id="lessonDifficulty">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Points Reward</label>
+                    <input type="number" id="lessonPoints" value="10" min="1">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Lesson</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Worksheet Modal -->
+    <div class="modal-overlay" id="addWorksheetModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Create New Worksheet</h3>
+                <button class="modal-close" onclick="closeModal('addWorksheetModal')">&times;</button>
+            </div>
+            <form id="addWorksheetForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="worksheetTitle" required placeholder="e.g., Math Practice Sheet">
+                </div>
+                <div class="form-group">
+                    <label>Description (optional)</label>
+                    <textarea id="worksheetDescription" rows="2" placeholder="Brief description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Worksheet Type</label>
+                    <select id="worksheetType" onchange="toggleWorksheetType()">
+                        <option value="uploaded">Uploaded (PDF/Image)</option>
+                        <option value="interactive">Interactive (Built-in)</option>
+                    </select>
+                </div>
+                <div id="uploadSection">
+                    <div class="form-group">
+                        <label>Upload File (PDF/Image)</label>
+                        <input type="file" id="worksheetFile" accept=".pdf,.jpg,.jpeg,.png">
+                    </div>
+                </div>
+                <div id="interactiveSection" style="display: none;">
+                    <h4 style="margin-bottom: 1rem;">Questions</h4>
+                    <div id="questionsContainer">
+                        <!-- Questions will be added here -->
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addQuestion()" style="margin-top: 1rem;">+ Add Question</button>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">Create Worksheet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Quiz Modal -->
+    <div class="modal-overlay" id="addQuizModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Create New Quiz</h3>
+                <button class="modal-close" onclick="closeModal('addQuizModal')">&times;</button>
+            </div>
+            <form id="addQuizForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="quizTitle" required placeholder="e.g., Week 1 Math Quiz">
+                </div>
+                <div class="form-group">
+                    <label>Description (optional)</label>
+                    <textarea id="quizDescription" rows="2" placeholder="Brief description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Quiz Type</label>
+                    <select id="quizType">
+                        <option value="mini">Mini Quiz</option>
+                        <option value="end_of_day">End of Day</option>
+                        <option value="weekly">Weekly</option>
+                    </select>
+                </div>
+                <h4 style="margin: 1.5rem 0 1rem;">Questions</h4>
+                <div id="quizQuestionsContainer">
+                    <!-- Questions will be added here -->
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addQuizQuestion()" style="margin-top: 1rem;">+ Add Question</button>
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">Create Quiz</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Schedule Modal -->
+    <div class="modal-overlay" id="addScheduleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Create New Schedule</h3>
+                <button class="modal-close" onclick="closeModal('addScheduleModal')">&times;</button>
+            </div>
+            <form id="addScheduleForm">
+                <div class="form-group">
+                    <label>Schedule Title</label>
+                    <input type="text" id="scheduleTitle" required placeholder="e.g., Week 1 - Math Focus">
+                </div>
+                <div class="form-group">
+                    <label>Child</label>
+                    <select id="scheduleChild" required>
+                        <option value="">Select child...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="scheduleStart" required>
+                </div>
+                <div class="form-group">
+                    <label>End Date (optional)</label>
+                    <input type="date" id="scheduleEnd">
+                </div>
+                <h4 style="margin: 1.5rem 0 1rem;">Lesson Items</h4>
+                <div id="scheduleItems">
+                    <!-- Schedule items will be added here -->
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addScheduleItem()" style="margin-top: 1rem;">+ Add Item</button>
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;">Create Schedule</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Reward Modal -->
+    <div class="modal-overlay" id="addRewardModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add New Reward</h3>
+                <button class="modal-close" onclick="closeModal('addRewardModal')">&times;</button>
+            </div>
+            <form id="addRewardForm">
+                <div class="form-group">
+                    <label>Reward Name</label>
+                    <input type="text" id="rewardName" required placeholder="e.g., Extra Game Time">
+                </div>
+                <div class="form-group">
+                    <label>Points Cost</label>
+                    <input type="number" id="rewardPoints" required min="1" placeholder="e.g., 50">
+                </div>
+                <div class="form-group">
+                    <label>Description (optional)</label>
+                    <textarea id="rewardDescription" rows="2" placeholder="Brief description of the reward"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Add Reward</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script type="module">
+        import { 
+            login, registerParent, registerChild, getCurrentUser, logout,
+            createLesson, getLessons, deleteLesson,
+            createWorksheet, getWorksheets, deleteWorksheet,
+            createQuiz, getQuizzes, deleteQuiz,
+            createSchedule, getSchedules, deleteSchedule,
+            getRewards, createReward, redeemReward,
+            apiPost, apiGet, apiDelete 
+        } from './js/api.js';
+
+        let currentUser = null;
+        let children = [];
+        let lessons = [];
+        let worksheets = [];
+        let quizzes = [];
+        let schedules = [];
+        let rewards = [];
+
+        // ─── Initialization ───
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUserData();
+            await loadAllData();
+            setupFormListeners();
+            populateChildDropdown();
+        });
+
+        async function loadUserData() {
+            try {
+                currentUser = await getCurrentUser();
+            } catch (err) {
+                showToast(err.message, 'error');
+                logout();
+            }
+        }
+
+        async function loadAllData() {
+            // Load children (via parent API)
+            try {
+                const profile = await apiGet('/api/v1/auth/me');
+                if (profile.children) {
+                    children = profile.children;
+                }
+                document.getElementById('stat-children').textContent = children.length;
+                renderChildren();
+                populateChildDropdown();
+            } catch (err) {
+                console.error('Failed to load children:', err);
+            }
+
+            // Load lessons
+            try {
+                lessons = await getLessons();
+                document.getElementById('stat-lessons').textContent = lessons.length;
+                renderLessons();
+            } catch (err) {
+                console.error('Failed to load lessons:', err);
+            }
+
+            // Load worksheets
+            try {
+                worksheets = await getWorksheets();
+                renderWorksheets();
+            } catch (err) {
+                console.error('Failed to load worksheets:', err);
+            }
+
+            // Load quizzes
+            try {
+                quizzes = await getQuizzes();
+                document.getElementById('stat-quizzes').textContent = quizzes.length;
+                renderQuizzes();
+            } catch (err) {
+                console.error('Failed to load quizzes:', err);
+            }
+
+            // Load schedules
+            try {
+                schedules = await getSchedules();
+                document.getElementById('stat-schedules').textContent = schedules.length;
+                renderSchedules();
+            } catch (err) {
+                console.error('Failed to load schedules:', err);
+            }
+
+            // Load rewards
+            try {
+                rewards = await getRewards();
+                renderRewards();
+            } catch (err) {
+                console.error('Failed to load rewards:', err);
+            }
+        }
+
+        function populateChildDropdown() {
+            const select = document.getElementById('scheduleChild');
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">Select child...</option>';
+            children.forEach(child => {
+                select.innerHTML += `<option value="${child.id}">${child.full_name}</option>`;
+            });
+        }
+
+        // ─── Navigation ───
+        window.showSection = function(sectionName) {
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.getElementById(`section-${sectionName}`).classList.add('active');
+            
+            document.querySelectorAll('.navbar-links a').forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+        };
+
+        // ─── Modal Functions ───
+        window.openModal = function(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        };
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        };
+
+        // ─── Toast Notifications ───
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+        window.showToast = showToast;
+
+        // ─── Worksheet type toggle ───
+        window.toggleWorksheetType = function() {
+            const type = document.getElementById('worksheetType').value;
+            document.getElementById('uploadSection').style.display = type === 'uploaded' ? 'block' : 'none';
+            document.getElementById('interactiveSection').style.display = type === 'interactive' ? 'block' : 'none';
+        };
+
+        // ─── Form Listeners ───
+        function setupFormListeners() {
+            // Add Lesson
+            document.getElementById('addLessonForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                try {
+                    await createLesson({
+                        title: document.getElementById('lessonTitle').value,
+                        subject: document.getElementById('lessonSubject').value,
+                        topic: document.getElementById('lessonTopic').value || null,
+                        description: document.getElementById('lessonDescription').value || null,
+                        content_type: document.getElementById('lessonType').value,
+                        content_url: document.getElementById('lessonUrl').value || null,
+                        content_body: document.getElementById('lessonDescription').value || null,
+                        difficulty: document.getElementById('lessonDifficulty').value,
+                        points_reward: parseInt(document.getElementById('lessonPoints').value)
+                    });
+                    showToast('Lesson created successfully!');
+                    closeModal('addLessonModal');
+                    document.getElementById('addLessonForm').reset();
+                    await loadAllData();
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            });
+
+            // Add Child
+            document.getElementById('addChildForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                try {
+                    await registerChild(
+                        document.getElementById('childUsername').value,
+                        document.getElementById('childEmail').value,
+                        document.getElementById('childFullName').value,
+                        document.getElementById('childPassword').value,
+                        currentUser.id
+                    );
+                    showToast('Child added successfully!');
+                    closeModal('addChildModal');
+                    document.getElementById('addChildForm').reset();
+                    await loadAllData();
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            });
+
+            // Add Worksheet
+            document.getElementById('addWorksheetForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const type = document.getElementById('worksheetType').value;
+                let data = {
+                    title: document.getElementById('worksheetTitle').value,
+                    description: document.getElementById('worksheetDescription').value || null,
+                    worksheet_type: type
+                };
+
+                if (type === 'interactive') {
+                    const questions = [];
+                    document.querySelectorAll('.question-container').forEach(elem => {
+                        questions.push({
+                            question_type: elem.querySelector('.question-type').value,
+                            question_text: elem.querySelector('.question-text').value,
+                            options: elem.querySelector('.options-input')?.value?.split(',').map(s => s.trim()) || null,
+                            correct_answer: elem.querySelector('.correct-answer').value,
+                            explanation: elem.querySelector('.explanation')?.value || null,
+                            points: parseInt(elem.querySelector('.points')?.value || '1')
+                        });
+                    });
+                    data.questions = questions;
+                }
+
+                try {
+                    await createWorksheet(data);
+                    showToast('Worksheet created successfully!');
+                    closeModal('addWorksheetModal');
+                    document.getElementById('addWorksheetForm').reset();
+                    await loadAllData();
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            });
+
+            // Add Quiz
+            document.getElementById('addQuizForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const questions = [];
+                document.querySelectorAll('.quiz-question-container').forEach(elem => {
+                    questions.push({
+                        question_type: elem.querySelector('.question-type').value,
+                        question_text: elem.querySelector('.question-text').value,
+                        options: elem.querySelector('.options-input')?.value?.split(',').map(s => s.trim()) || null,
+                        correct_answer: elem.querySelector('.correct-answer').value,
+                        explanation: elem.querySelector('.explanation')?.value || null,
+                        points: parseInt(elem.querySelector('.points')?.value || '1')
+                    });
+                });
+
+                try {
+                    await createQuiz({
+                        title: document.getElementById('quizTitle').value,
+                        description: document.getElementById('quizDescription').value || null,
+                        quiz_type: document.getElementById('quizType').value,
+                        questions: questions
+                    });
+                    showToast('Quiz created successfully!');
+                    closeModal('addQuizModal');
+                    document.getElementById('addQuizForm').reset();
+                    document.getElementById('quizQuestionsContainer').innerHTML = '';
+                    await loadAllData();
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            });
+
+            // Add Schedule
+            document.getElementById('addScheduleForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const items = [];
+                document.querySelectorAll('.schedule-item-container').forEach((elem, index) => {
+                    items.push({
+                        lesson_id: parseInt(elem.querySelector('.lesson-select')?.value) || null,
+                        worksheet_id: parseInt(elem.querySelector('.worksheet-select')?.value) || null,
+                        quiz_id: parseInt(elem.querySelector('.quiz-select')?.value) || null,
+                        day_of_week: parseInt(elem.querySelector('.day-select')?.value) || 0,
+                        order_index: index,
+                        time_slot: elem.querySelector('.time-slot')?.value || null
+                    });
+                });
+
+                try {
+                    await createSchedule({
+                        title: document.getElementById('scheduleTitle').value,
+                        child_id: parseInt(document.getElementById('scheduleChild').value),
+                        start_date: document.getElementById('scheduleStart').value,
+                        end_date: document.getElementById('scheduleEnd').value || null,
+                        items: items
+                    });
+                    showToast('Schedule created successfully!');
+                    closeModal('addScheduleModal');
+                    document.getElementById('addScheduleForm').reset();
+                    document.getElementById('scheduleItems').innerHTML = '';
+                    await loadAllData();
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            });
+
+            // Add Reward
+            document.getElementById('addRewardForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                try {
+                    await createReward({
+                        name: document.getElementById('rewardName').value,
+                        points_cost: parseInt(document.getElementById('rewardPoints').value),
+                        description: document.getElementById('rewardDescription').value || null
+                    });
+                    showToast('Reward added successfully!');
+                    closeModal('addRewardModal');
+                    document.getElementById('addRewardForm').reset();
+                    await loadAllData();
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            });
+        }
+
+        // ─── Render Functions ───
+        function renderChildren() {
+            const container = document.getElementById('children-list');
+            if (!container) return;
+            
+            if (children.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No children added yet.</p>';
+                return;
+            }
+
+            container.innerHTML = children.map(child => `
+                <div class="card">
+                    <div class="child-card">
+                        <div class="child-avatar">👤</div>
+                        <div class="child-info">
+                            <h3>${child.full_name}</h3>
+                            <p>@${child.username}</p>
+                            <p>Level ${child.level} • Streak: ${child.current_streak} days</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderLessons() {
+            const container = document.getElementById('lessons-list');
+            if (!container) return;
+            
+            if (lessons.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No lessons yet. Create your first lesson!</p>';
+                return;
+            }
+
+            container.innerHTML = lessons.map(lesson => `
+                <div class="card lesson-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="lesson-subject">${lesson.subject}</div>
+                            <div class="lesson-title">${lesson.title}</div>
+                        </div>
+                        <div>
+                            <span class="badge badge-primary">${lesson.difficulty}</span>
+                            <span style="color: #fbbf24; margin-left: 8px;">⭐ ${lesson.points_reward}pts</span>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;">
+                        ${lesson.description || 'No description'}
+                    </p>
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button class="btn btn-danger btn-sm" onclick="deleteLessonHandler(${lesson.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderWorksheets() {
+            const container = document.getElementById('worksheets-list');
+            if (!container) return;
+            
+            if (worksheets.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No worksheets yet.</p>';
+                return;
+            }
+
+            container.innerHTML = worksheets.map(ws => `
+                <div class="card worksheet-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="lesson-subject">${ws.worksheet_type === 'interactive' ? 'Interactive' : 'Uploaded'}</div>
+                            <div class="lesson-title">${ws.title}</div>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;">
+                        ${ws.description || 'No description'}
+                    </p>
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button class="btn btn-danger btn-sm" onclick="deleteWorksheetHandler(${ws.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderQuizzes() {
+            const container = document.getElementById('quizzes-list');
+            if (!container) return;
+            
+            if (quizzes.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No quizzes yet.</p>';
+                return;
+            }
+
+            container.innerHTML = quizzes.map(quiz => `
+                <div class="card quiz-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="lesson-subject">${quiz.quiz_type}</div>
+                            <div class="lesson-title">${quiz.title}</div>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;">
+                        ${quiz.description || 'No description'}
+                    </p>
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button class="btn btn-danger btn-sm" onclick="deleteQuizHandler(${quiz.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSchedules() {
+            const container = document.getElementById('schedules-list');
+            if (!container) return;
+            
+            if (schedules.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No schedules yet.</p>';
+                return;
+            }
+
+            container.innerHTML = schedules.map(sched => `
+                <div class="card schedule-card">
+                    <div class="schedule-item-header">
+                        <div class="schedule-item-title">${sched.title}</div>
+                        <div>
+                            <span class="badge badge-secondary">${sched.child_name || 'Child'}</span>
+                        </div>
+                    </div>
+                    <div class="schedule-item-day">
+                        ${sched.start_date} to ${sched.end_date || 'Ongoing'}
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button class="btn btn-danger btn-sm" onclick="deleteScheduleHandler(${sched.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderRewards() {
+            const container = document.getElementById('rewards-list');
+            if (!container) return;
+            
+            if (rewards.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No rewards yet. Add your first reward!</p>';
+                return;
+            }
+
+            container.innerHTML = rewards.map(reward => `
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">${reward.title}</h3>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;">
+                        ${reward.description || 'No description'}
+                    </p>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: #fbbf24;">⭐</span>
+                        <span style="font-weight: 600;">${reward.points_cost} points</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ─── Delete Handlers ───
+        async function deleteLessonHandler(id) {
+            if (!confirm('Delete this lesson?')) return;
+            try {
+                await deleteLesson(id);
+                showToast('Lesson deleted');
+                await loadAllData();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function deleteWorksheetHandler(id) {
+            if (!confirm('Delete this worksheet?')) return;
+            try {
+                await deleteWorksheet(id);
+                showToast('Worksheet deleted');
+                await loadAllData();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function deleteQuizHandler(id) {
+            if (!confirm('Delete this quiz?')) return;
+            try {
+                await deleteQuiz(id);
+                showToast('Quiz deleted');
+                await loadAllData();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        async function deleteScheduleHandler(id) {
+            if (!confirm('Delete this schedule?')) return;
+            try {
+                await deleteSchedule(id);
+                showToast('Schedule deleted');
+                await loadAllData();
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        // ─── Add dynamic form items ───
+        window.addQuestion = function() {
+            const html = `
+                <div class="question-container" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem;">
+                    <div class="form-group">
+                        <label>Question Type</label>
+                        <select class="question-type">
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="true_false">True/False</option>
+                            <option value="short_answer">Short Answer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Question Text</label>
+                        <input type="text" class="question-text" placeholder="Enter your question">
+                    </div>
+                    <div class="form-group">
+                        <label>Options (comma separated)</label>
+                        <input type="text" class="options-input" placeholder="Option 1, Option 2, Option 3">
+                    </div>
+                    <div class="form-group">
+                        <label>Correct Answer</label>
+                        <input type="text" class="correct-answer" placeholder="e.g., Option 1">
+                    </div>
+                    <div class="form-group">
+                        <label>Points</label>
+                        <input type="number" class="points" value="1" min="1">
+                    </div>
+                </div>
+            `;
+            document.getElementById('questionsContainer').insertAdjacentHTML('beforeend', html);
+        };
+
+        window.addQuizQuestion = function() {
+            const html = `
+                <div class="quiz-question-container" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem;">
+                    <div class="form-group">
+                        <label>Question Type</label>
+                        <select class="question-type">
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="true_false">True/False</option>
+                            <option value="short_answer">Short Answer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Question Text</label>
+                        <input type="text" class="question-text" placeholder="Enter your question">
+                    </div>
+                    <div class="form-group">
+                        <label>Options (comma separated)</label>
+                        <input type="text" class="options-input" placeholder="Option 1, Option 2, Option 3">
+                    </div>
+                    <div class="form-group">
+                        <label>Correct Answer</label>
+                        <input type="text" class="correct-answer" placeholder="e.g., Option 1">
+                    </div>
+                    <div class="form-group">
+                        <label>Points</label>
+                        <input type="number" class="points" value="1" min="1">
+                    </div>
+                </div>
+            `;
+            document.getElementById('quizQuestionsContainer').insertAdjacentHTML('beforeend', html);
+        };
+
+        window.addScheduleItem = function() {
+            const html = `
+                <div class="schedule-item-container" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem;">
+                    <div class="form-group">
+                        <label>Lesson</label>
+                        <select class="lesson-select">
+                            <option value="">Select lesson...</option>
+                            ${lessons.map(l => `<option value="${l.id}">${l.title} (${l.subject})</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Worksheet (optional)</label>
+                        <select class="worksheet-select">
+                            <option value="">Select worksheet...</option>
+                            ${worksheets.map(w => `<option value="${w.id}">${w.title}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quiz (optional)</label>
+                        <select class="quiz-select">
+                            <option value="">Select quiz...</option>
+                            ${quizzes.map(q => `<option value="${q.id}">${q.title}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Day of Week</label>
+                        <select class="day-select">
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            document.getElementById('scheduleItems').insertAdjacentHTML('beforeend', html);
+        };
+
+        // ─── Logout ───
+        window.logout = logout;
+    </script>
+</body>
+</html>

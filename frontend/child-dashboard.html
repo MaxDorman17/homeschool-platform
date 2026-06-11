@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Learning - Home School Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --card-border: rgba(99, 102, 241, 0.3);
+            --fun-primary: #8b5cf6;
+            --fun-secondary: #ec4899;
+            --fun-accent: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--fun-primary);
+            text-decoration: none;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .navbar-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .navbar-links a:hover,
+        .navbar-links a.active {
+            color: var(--fun-primary);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .profile-header {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--fun-primary), var(--fun-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .profile-info h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--fun-accent);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            height: 1rem;
+            background: var(--border);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--fun-primary), var(--fun-secondary));
+            transition: width 0.3s ease;
+        }
+
+        .lesson-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .lesson-card:hover {
+            border-color: var(--fun-primary);
+            transform: translateY(-2px);
+        }
+
+        .lesson-card.completed {
+            opacity: 0.7;
+            border-color: var(--secondary);
+        }
+
+        .lesson-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .lesson-subject {
+            color: var(--fun-primary);
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--fun-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--fun-primary);
+            transform: translateY(-2px);
+        }
+
+        .reward-card {
+            text-align: center;
+        }
+
+        .reward-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .reward-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .reward-cost {
+            color: var(--fun-accent);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 2000;
+        }
+
+        .toast {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--secondary);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 1rem;
+        }
+
+        .quiz-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-gold {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .navbar-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-stats {
+                justify-content: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">🌟 My Learning</a>
+        <div class="navbar-links">
+            <a href="#" class="active" onclick="showSection('today')">Today</a>
+            <a href="#" onclick="showSection('quizzes')">Quizzes</a>
+            <a href="#" onclick="showSection('rewards')">Rewards</a>
+            <a href="#" onclick="showSection('achievements')">Achievements</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="avatar">🦊</div>
+            <div class="profile-info">
+                <h2 id="child-name">Loading...</h2>
+                <p style="color: var(--text-muted);">Level <span id="child-level">1</span> • <span id="child-xp">0</span> XP</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="level-progress" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">🔥 <span id="streak-count">0</span></div>
+                <div class="stat-label">Day Streak</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" style="color: #fbbf24;">⭐ <span id="points-balance">0</span></div>
+                <div class="stat-label">Points</div>
+            </div>
+        </div>
+
+        <!-- Today's Lessons -->
+        <div id="section-today" class="section active">
+            <h2 style="margin-bottom: 1.5rem;">Today's Plan 📅</h2>
+            <div id="today-lessons">
+                <p style="color: var(--text-muted);">Loading your schedule...</p>
+            </div>
+        </div>
+
+        <!-- Quizzes -->
+        <div id="section-quizzes" class="section">
+            <h2 style="margin-bottom: 1.5rem;">My Quizzes 🧠</h2>
+            <div id="quizzes-list">
+                <p style="color: var(--text-muted);">No quizzes available</p>
+            </div>
+        </div>
+
+        <!-- Rewards Shop -->
+        <div id="section-rewards" class="section">
+            <h2 style="margin-bottom: 1.5rem;">Reward Shop 🎁</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Redeem your points for awesome rewards!</p>
+            <div id="rewards-list" class="dashboard-grid grid-3">
+                <p style="color: var(--text-muted);">Loading rewards...</p>
+            </div>
+        </div>
+
+        <!-- Achievements -->
+        <div id="section-achievements" class="section">
+            <h2 style="margin-bottom: 1.5rem;">My Badges 🏆</h2>
+            <div id="badges-list" class="dashboard-grid grid-3">
+                <p style="color: var(--text-muted);">Complete lessons and quizzes to earn badges!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script type="module">
+        import { 
+            getCurrentUser, logout, getQuizzes,
+            getRewards, redeemReward, apiGet
+        } from './js/api.js';
+
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUserData();
+            await loadDashboardData();
+        });
+
+        async function loadUserData() {
+            try {
+                currentUser = await getCurrentUser();
+            } catch (err) {
+                showToast(err.message, 'error');
+                logout();
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                const me = await apiGet('/api/v1/auth/me');
+                document.getElementById('child-name').textContent = me.full_name;
+                document.getElementById('streak-count').textContent = me.current_streak || 0;
+                document.getElementById('points-balance').textContent = me.points_balance || 0;
+                
+                // Load quizzes
+                const quizzes = await getQuizzes();
+                renderQuizzes(quizzes);
+
+                // Load rewards
+                const rewards = await getRewards();
+                renderRewards(rewards);
+            } catch (err) {
+                console.error('Failed to load dashboard:', err);
+                showToast('Failed to load dashboard', 'error');
+            }
+        }
+
+        function renderQuizzes(quizzes) {
+            const container = document.getElementById('quizzes-list');
+            if (quizzes.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No quizzes yet</h3><p>Your parent will create quizzes soon!</p></div>';
+                return;
+            }
+
+            container.innerHTML = quizzes.map(quiz => `
+                <div class="quiz-card">
+                    <div class="quiz-title">${quiz.title}</div>
+                    <div style="color: var(--text-muted); margin-bottom: 1rem;">${quiz.description || ''}</div>
+                    <button class="btn btn-primary" onclick="startQuiz(${quiz.id}, '${quiz.title.replace(/'/g, "\\'")}')">Start Quiz</button>
+                </div>
+            `).join('');
+        }
+
+        function renderRewards(rewards) {
+            const container = document.getElementById('rewards-list');
+            if (rewards.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No rewards yet</h3><p>Your parent will add rewards soon!</p></div>';
+                return;
+            }
+
+            container.innerHTML = rewards.map(reward => `
+                <div class="card reward-card">
+                    <div class="reward-icon">🎁</div>
+                    <div class="reward-name">${reward.title}</div>
+                    <div class="reward-cost">⭐ ${reward.points_cost} points</div>
+                    <button class="btn btn-primary btn-block" onclick="redeemRewardAction(${reward.id}, '${reward.title.replace(/'/g, "\\'")}', ${reward.points_cost})">
+                        Redeem
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function redeemRewardAction(rewardId, rewardName, cost) {
+            const balance = parseInt(document.getElementById('points-balance').textContent);
+            if (balance < cost) {
+                showToast(`You need ${cost - balance} more points!`, 'error');
+                return;
+            }
+
+            try {
+                const result = await redeemReward(rewardId);
+                showToast(`🎉 Redeemed "${rewardName}"! You have ${result.remaining_points} points left.`);
+                document.getElementById('points-balance').textContent = result.remaining_points;
+                await loadDashboardData();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        function startQuiz(quizId, quizName) {
+            showToast(`Quiz "${quizName}" starting... 🧠`, 'success');
+            // In a real app, this would navigate to the quiz page
+        }
+
+        // ─── Navigation ───
+        window.showSection = function(sectionName) {
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.getElementById(`section-${sectionName}`).classList.add('active');
+            
+            document.querySelectorAll('.navbar-links a').forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+        };
+
+        // ─── Toast Notifications ───
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+        window.showToast = showToast;
+
+        // ─── Logout ───
+        window.logout = logout;
+    </script>
+</body>
+</html>

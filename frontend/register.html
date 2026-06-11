@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home School Platform - Register</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>📚 Home School</h1>
+            <p class="subtitle">Create your account to get started.</p>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="role">Account Type</label>
+                    <select id="role">
+                        <option value="parent">Parent</option>
+                        <option value="child">Child</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required minlength="8" placeholder="Minimum 8 characters">
+                </div>
+                <div id="registerError" style="color: var(--danger); margin-bottom: 15px; display: none;"></div>
+                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+            </form>
+
+            <div style="text-align: center; margin-top: 20px; color: var(--text-muted);">
+                Already have an account? <a href="login.html" style="color: var(--primary-light);">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { registerParent, registerChild } from './js/api.js';
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const role = document.getElementById('role').value;
+            const fullName = document.getElementById('fullName').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('registerError');
+
+            try {
+                if (role === 'parent') {
+                    await registerParent(username, email, fullName, password);
+                } else {
+                    await registerChild(username, email, fullName, password, 0);
+                }
+                // Show success message before redirect
+                errorEl.style.color = '#10b981'; // success green
+                errorEl.textContent = '✅ Account created successfully! Redirecting to login...';
+                errorEl.style.display = 'block';
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } catch (err) {
+                errorEl.style.color = 'var(--danger)';
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

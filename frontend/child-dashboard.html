@@ -661,7 +661,8 @@
         }
 
         function startQuiz(quizId, quizName) {
-            showToast(`Quiz "${quizName}" starting... 🧠`, 'success');
+            // Navigate to quiz page
+            window.location.href = `quiz.html?id=${quizId}`;
         }
 
         // ─── Navigation ───

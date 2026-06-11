@@ -960,6 +960,21 @@
         </div>
     </div>
 
+    <!-- Assign Lesson Modal -->
+    <div class="modal-overlay" id="assignLessonModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Assign Lesson to Slot</h3>
+                <button class="modal-close" onclick="closeModal('assignLessonModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="availableLessons">
+                    <!-- Lessons will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -1083,6 +1098,7 @@
 
         // Store assigned lessons: { dayIndex: { slotIndex: lessonId } }
         let plannerAssignments = {};
+        let currentSlotAssignment = null; // { dayIndex, slotIndex }
 
         function buildPlannerGrid() {
             const container = document.getElementById('planner-container');
@@ -1114,7 +1130,7 @@
                         html += `<div class="slot-content"><p style="color: var(--text-muted); font-size: 0.85rem;">No lesson assigned</p></div>`;
                     }
                     
-                    html += `<button class="btn btn-primary btn-sm" style="width: 100%; margin-top: 0.5rem;" onclick="assignLessonToSlot(${dayIndex}, ${s})">Assign Lesson</button>`;
+                    html += `<button class="btn btn-primary btn-sm" style="width: 100%; margin-top: 0.5rem;" onclick="openLessonPicker(${dayIndex}, ${s})">Assign Lesson</button>`;
                     html += `</div>`;
                 }
                 
@@ -1124,39 +1140,64 @@
             container.innerHTML = html;
         }
 
-        window.assignLessonToSlot = async function(dayIndex, slotIndex) {
+        window.openLessonPicker = function(dayIndex, slotIndex) {
+            currentSlotAssignment = { dayIndex, slotIndex };
+            showAvailableLessons();
+            openModal('assignLessonModal');
+        };
+
+        function showAvailableLessons() {
+            const container = document.getElementById('availableLessons');
+            
             if (lessons.length === 0) {
-                showToast('No lessons available. Create one first!', 'error');
+                container.innerHTML = '<p style="color: var(--text-muted);">No lessons available. Create some first!</p>';
                 return;
             }
-            
-            // Simple selection: just assign the first unassigned lesson
-            // In a full version this would be a modal picker
-            const slotKey = `${dayIndex}-${slotIndex}`;
-            const currentAssignment = plannerAssignments[slotKey];
-            
-            if (currentAssignment) {
-                // Already assigned, just re-render
-                buildPlannerGrid();
-                return;
-            }
-            
-            // For now, pick the first available lesson
-            // A real implementation would show a picker modal
-            const availableLessons = lessons.filter(l => {
-                // Check if this lesson is already in another slot
-                return !Object.values(plannerAssignments).includes(l.id);
+
+            let html = '';
+            lessons.forEach(lesson => {
+                html += `
+                    <div class="card lesson-card-mini" style="margin-bottom: 1rem; cursor: pointer; transition: all 0.3s ease;" 
+                         onclick="selectLessonForSlot(${lesson.id})"
+                         onmouseover="this.style.transform='translateX(5px)'; this.style.borderColor='var(--primary-light)'"
+                         onmouseout="this.style.transform='none'; this.style.borderColor='var(--card-border)'">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div class="lesson-subject">${lesson.subject}</div>
+                                <div class="lesson-title" style="font-size: 1.1rem;">${lesson.title}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="lesson-meta">${lesson.difficulty || 'Medium'}</div>
+                                <div style="color: var(--fun-accent);">⭐ ${lesson.points_reward} pts</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             });
             
-            if (availableLessons.length === 0) {
-                showToast('All lessons are already assigned to the planner', 'error');
-                return;
-            }
+            container.innerHTML = html;
+        }
+
+        window.selectLessonForSlot = function(lessonId) {
+            if (!currentSlotAssignment) return;
             
-            // Assign first available lesson (simple approach)
-            plannerAssignments[slotKey] = availableLessons[0].id;
+            const { dayIndex, slotIndex } = currentSlotAssignment;
+            const slotKey = `${dayIndex}-${slotIndex}`;
+            
+            plannerAssignments[slotKey] = lessonId;
             buildPlannerGrid();
-            showToast(`Assigned "${availableLessons[0].title}" to ${DAY_NAMES[dayIndex]} Lesson ${slotIndex + 1}`);
+            closeModal('assignLessonModal');
+            
+            // Get lesson name for toast
+            const lesson = lessons.find(l => l.id === lessonId);
+            if (lesson) {
+                showToast(`Assigned "${lesson.title}" to ${DAY_NAMES[dayIndex]} Lesson ${slotIndex + 1}`);
+            }
+        };
+
+        window.assignLessonToSlot = async function(dayIndex, slotIndex) {
+            // This is now handled by openLessonPicker
+            openLessonPicker(dayIndex, slotIndex);
         };
 
         window.removeLessonFromSlot = function(dayIndex, slotIndex) {

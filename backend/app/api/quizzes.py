@@ -19,11 +19,14 @@ def create_quiz(
     db: Session = Depends(get_db)
 ):
     """Parent creates a new quiz."""
+    # Convert questions to dictionaries for JSON storage
+    questions_data = [q.model_dump() for q in req.questions] if req.questions else []
+    
     quiz = Quiz(
         title=req.title,
         description=req.description,
         quiz_type=req.quiz_type,
-        questions=req.questions,
+        questions=questions_data,
         pass_score=req.pass_score,
         points_reward=req.points_reward,
         created_by=current_user.id

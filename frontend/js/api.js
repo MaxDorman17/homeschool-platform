@@ -139,6 +139,10 @@ export async function getChildDashboard(childId) {
     return apiGet(`/api/v1/dashboard/child/${childId}`);
 }
 
+export async function getTodayLessons() {
+    return apiGet(`/api/v1/auth/me/today-lessons`);
+}
+
 // ─── Generic Helpers ───
 export async function apiGet(url) {
     const res = await fetch(`${API_BASE}${url}`, {

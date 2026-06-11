@@ -87,6 +87,73 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     return TokenResponse(access_token=token)
 
 
+@router.get("/me/today-lessons")
+def get_today_lessons_for_me(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get today's scheduled lessons for the current child user."""
+    if current_user.role != UserRole.CHILD:
+        raise HTTPException(status_code=403, detail="Only children can access this endpoint")
+    
+    child_profile = db.query(ChildProfile).filter(
+        ChildProfile.user_id == current_user.id
+    ).first()
+    
+    if not child_profile:
+        return {"today_lessons": [], "child_name": current_user.full_name}
+    
+    from datetime import date
+    today = date.today()
+    
+    # Find active schedules for this child
+    active_schedules = db.query(Schedule).filter(
+        Schedule.child_id == child_profile.id,
+        Schedule.is_active == True,
+        Schedule.start_date <= today,
+        db.or_(
+            Schedule.end_date >= today,
+            Schedule.end_date.is_(None)
+        )
+    ).all()
+    
+    # Get day of week (0=Monday, 4=Friday)
+    dow = today.weekday()
+    
+    today_lessons = []
+    seen_lesson_ids = set()
+    
+    for schedule in active_schedules:
+        for item in schedule.items:
+            if item.day_of_week == dow:
+                if item.lesson_id not in seen_lesson_ids:
+                    lesson = db.query(Lesson).filter(Lesson.id == item.lesson_id).first()
+                    if lesson:
+                        seen_lesson_ids.add(lesson.id)
+                        today_lessons.append({
+                            "id": lesson.id,
+                            "title": lesson.title,
+                            "subject": lesson.subject,
+                            "topic": lesson.topic,
+                            "description": lesson.description,
+                            "content_type": lesson.content_type,
+                            "content_url": lesson.content_url,
+                            "difficulty": lesson.difficulty,
+                            "points_reward": lesson.points_reward,
+                            "worksheet_id": item.worksheet_id,
+                            "quiz_id": item.quiz_id
+                        })
+    
+    # Sort by order_index
+    today_lessons.sort(key=lambda x: 0)  # Simple sort, could be enhanced
+    
+    return {
+        "today_lessons": today_lessons,
+        "child_name": current_user.full_name,
+        "day": today.strftime("%A, %B %d, %Y")
+    }
+
+
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """Get current user profile with related data."""

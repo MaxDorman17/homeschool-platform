@@ -1021,14 +1021,15 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script type="module">
-        import { 
+        import {
             login, registerParent, registerChild, getCurrentUser, logout,
             createLesson, getLessons, deleteLesson,
             createWorksheet, getWorksheets, deleteWorksheet,
             createQuiz, getQuizzes, deleteQuiz,
             createSchedule, getSchedules, deleteSchedule,
             getRewards, createReward, redeemReward,
-            apiPost, apiGet, apiDelete 
+            apiPost, apiGet, apiDelete,
+            createWorksheetForm, uploadWorksheetFile
         } from './js/api.js';
 
         let currentUser = null;
@@ -1375,11 +1376,6 @@
             document.getElementById('addWorksheetForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const type = document.getElementById('worksheetType').value;
-                let data = {
-                    title: document.getElementById('worksheetTitle').value,
-                    description: document.getElementById('worksheetDescription').value || null,
-                    worksheet_type: type
-                };
 
                 if (type === 'interactive') {
                     const questions = [];
@@ -1393,26 +1389,45 @@
                             points: parseInt(elem.querySelector('.points')?.value || '1')
                         });
                     });
-                    data.questions = questions;
+
+                    try {
+                        await createWorksheet({
+                            title: document.getElementById('worksheetTitle').value,
+                            description: document.getElementById('worksheetDescription').value || null,
+                            worksheet_type: type,
+                            questions
+                        });
+                        showToast('Interactive worksheet created successfully!');
+                        closeModal('addWorksheetModal');
+                        document.getElementById('addWorksheetForm').reset();
+                        await loadAllData();
+                    } catch (err) {
+                        showToast(err.message, 'error');
+                    }
+                    return;
                 }
 
+                // Uploaded worksheet via FormData
+                const formData = new FormData();
+                formData.append('title', document.getElementById('worksheetTitle').value);
+                const desc = document.getElementById('worksheetDescription').value;
+                if (desc) {
+                    formData.append('description', desc);
+                }
+                formData.append('worksheet_type', 'uploaded');
+
                 try {
-                    const ws = await createWorksheet(data);
-                    
-                    // If uploaded type and file selected, upload the file
-                    if (type === 'uploaded') {
-                        const fileInput = document.getElementById('worksheetFile');
-                        if (fileInput.files.length > 0) {
-                            const file = fileInput.files[0];
-                            const uploadResult = await uploadWorksheetFile(ws.id, file);
-                            showToast('Worksheet created and file uploaded successfully!');
-                        } else {
-                            showToast('Worksheet created successfully!');
-                        }
+                    const ws = await createWorksheetForm(formData);
+
+                    const fileInput = document.getElementById('worksheetFile');
+                    if (fileInput?.files?.length > 0) {
+                        const file = fileInput.files[0];
+                        await uploadWorksheetFile(ws.id, file);
+                        showToast('Worksheet created and file uploaded successfully!');
                     } else {
                         showToast('Worksheet created successfully!');
                     }
-                    
+
                     closeModal('addWorksheetModal');
                     document.getElementById('addWorksheetForm').reset();
                     await loadAllData();

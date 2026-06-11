@@ -80,6 +80,18 @@ export async function createWorksheet(data) {
     return apiPost('/api/v1/worksheets', data);
 }
 
+export async function createWorksheetForm(formData) {
+    const res = await fetch(`${API_BASE}/api/v1/worksheets`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${authToken}`
+        },
+        body: formData
+    });
+    if (res.status === 401) { logout(); throw new Error('Session expired'); }
+    return await res.json();
+}
+
 export async function getWorksheets() {
     return apiGet('/api/v1/worksheets');
 }

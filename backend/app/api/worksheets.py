@@ -19,58 +19,68 @@ def create_worksheet(
     title: str = Form(...),
     description: Optional[str] = Form(None),
     worksheet_type: str = Form("uploaded"),
+    questions: Optional[str] = Form(None),
     current_user: User = Depends(require_parent),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Create a new worksheet."""
+    import json
+
+    parsed_questions = None
+    if questions:
+        try:
+            parsed_questions = json.loads(questions)
+        except json.JSONDecodeError:
+            parsed_questions = None
+
     ws = Worksheet(
         title=title,
         description=description,
         worksheet_type=WorksheetType(worksheet_type),
-        questions=None,  # Interactive questions would be JSON in body
+        questions=parsed_questions,
         points_reward=5,
-        created_by=current_user.id
+        created_by=current_user.id,
     )
     db.add(ws)
-    db.flush()
-
-    # If interactive, questions would be in JSON body
-    # For now, uploaded files are handled below
-
     db.commit()
     db.refresh(ws)
     return ws
 
 
-@router.post("/upload/{worksheet_id}", status_code=200)
+@router.post("/upload/{worksheet_id}", response_model=dict, status_code=200)
 def upload_worksheet_file(
     worksheet_id: int,
     file: UploadFile = File(...),
     current_user: User = Depends(require_parent),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Upload a PDF or image file for a worksheet."""
     ws = db.query(Worksheet).filter(
         Worksheet.id == worksheet_id,
-        Worksheet.created_by == current_user.id
+        Worksheet.created_by == current_user.id,
     ).first()
     if not ws:
         raise HTTPException(status_code=404, detail="Worksheet not found")
 
-    # Save file
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    file_ext = os.path.splitext(file.filename)[1] if file.filename else ".pdf"
-    file_name = f"{uuid.uuid4().hex}{file_ext}"
-    file_path = os.path.join(settings.UPLOAD_DIR, file_name)
+    file_ext = os.path.splitext(file.filename or "")[1] or ".pdf"
+    filename = f"{worksheet_id}_{uuid.uuid4().hex}{file_ext}"
+    file_path = os.path.join(settings.UPLOAD_DIR, filename)
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    ws.file_path = file_path
+    ws.file_path = filename
     ws.worksheet_type = WorksheetType.UPLOADED
     db.commit()
+    db.refresh(ws)
 
-    return {"message": "File uploaded successfully", "file_path": file_path}
+    url = f"/uploads/{filename}"
+    return {
+        "message": "File uploaded successfully",
+        "file_path": file_path,
+        "file_url": url,
+    }
 
 
 @router.get("", response_model=List[WorksheetResponse])

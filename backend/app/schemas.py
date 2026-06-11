@@ -186,6 +186,7 @@ class WorksheetResponse(BaseModel):
     description: Optional[str] = None
     worksheet_type: str
     file_path: Optional[str] = None
+    file_url: Optional[str] = None
     points_reward: int
     created_by: int
     created_at: datetime

@@ -42,6 +42,12 @@ def health_check():
     return {"status": "ok", "message": "Homeschool Platform API is running"}
 
 
+# Serve uploaded files
+upload_path = os.path.join(os.path.dirname(__file__), "..", "uploads")
+if os.path.exists(upload_path):
+    app.mount("/uploads", StaticFiles(directory=upload_path), name="uploads")
+
+
 # Serve frontend static files
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
 if os.path.exists(frontend_path):

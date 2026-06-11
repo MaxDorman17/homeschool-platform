@@ -14,6 +14,22 @@ settings = get_settings()
 router = APIRouter(prefix="/api/v1/worksheets", tags=["Worksheets"])
 
 
+def worksheet_to_response(ws: Worksheet) -> dict:
+    base = {
+        "id": ws.id,
+        "title": ws.title,
+        "description": ws.description,
+        "worksheet_type": ws.worksheet_type.value if hasattr(ws.worksheet_type, "value") else ws.worksheet_type,
+        "file_path": ws.file_path,
+        "file_url": f"/uploads/{ws.file_path}" if ws.file_path else None,
+        "points_reward": ws.points_reward,
+        "created_by": ws.created_by,
+        "created_at": ws.created_at,
+        "questions": ws.questions,
+    }
+    return base
+
+
 @router.post("", response_model=WorksheetResponse, status_code=201)
 def create_worksheet(
     title: str = Form(...),
@@ -44,7 +60,7 @@ def create_worksheet(
     db.add(ws)
     db.commit()
     db.refresh(ws)
-    return ws
+    return worksheet_to_response(ws)
 
 
 @router.post("/upload/{worksheet_id}", response_model=dict, status_code=200)
@@ -93,20 +109,20 @@ def list_worksheets(
     if current_user.role == UserRole.PARENT:
         query = query.filter(Worksheet.created_by == current_user.id)
     worksheets = query.order_by(Worksheet.created_at.desc()).all()
-    return worksheets
+    return [worksheet_to_response(ws) for ws in worksheets]
 
 
 @router.get("/{worksheet_id}", response_model=WorksheetResponse)
 def get_worksheet(
     worksheet_id: int,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get a single worksheet."""
     ws = db.query(Worksheet).filter(Worksheet.id == worksheet_id).first()
     if not ws:
         raise HTTPException(status_code=404, detail="Worksheet not found")
-    return ws
+    return worksheet_to_response(ws)
 
 
 @router.put("/{worksheet_id}", response_model=WorksheetResponse)
@@ -150,8 +166,10 @@ def delete_worksheet(
         raise HTTPException(status_code=404, detail="Worksheet not found")
 
     # Delete file if exists
-    if ws.file_path and os.path.exists(ws.file_path):
-        os.remove(ws.file_path)
+    if ws.file_path:
+        abs_path = os.path.join(settings.UPLOAD_DIR, ws.file_path)
+        if os.path.exists(abs_path):
+            os.remove(abs_path)
 
     db.delete(ws)
     db.commit()

@@ -681,16 +681,17 @@
         <!-- Worksheets Section -->
         <div id="section-worksheets" class="section">
             <div class="section-header">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h2>Worksheets</h2>
-                        <p>Create and manage worksheets for your children.</p>
-                    </div>
-                    <button class="btn btn-primary" onclick="openModal('addWorksheetModal')">+ Add Worksheet</button>
+                <div>
+                    <h2>Worksheets</h2>
+                    <p id="worksheetBreadcrumb">All subjects</p>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-secondary" id="btnWorksheetBack" style="display:none;" onclick="window.worksheetBack()">← Back</button>
+                    <button class="btn btn-primary" id="btnAddWorksheet" onclick="openModal('addWorksheetModal')">+ Add Worksheet</button>
                 </div>
             </div>
-            <div id="worksheets-list" class="dashboard-grid grid-2">
-                <!-- Worksheets will be rendered here -->
+            <div id="worksheets-list" class="dashboard-grid grid-3">
+                <!-- Subject boxes / Unit boxes / Worksheets -->
             </div>
         </div>
 
@@ -1591,6 +1592,135 @@
                     showToast(err.message, 'error');
                 }
             });
+        }
+
+        let worksheetView = 'subjects'; // subjects | units | worksheets
+        let selectedSubjectId = null;
+        let selectedUnitId = null;
+        window.workloadCurrentView = () => worksheetView;
+
+        window.openWorksheetSubject = function (subjectId) {
+            selectedSubjectId = subjectId;
+            selectedUnitId = null;
+            worksheetView = 'units';
+            document.getElementById('worksheetBreadcrumb').textContent = 'Subject';
+            document.getElementById('btnWorksheetBack').style.display = 'inline-flex';
+            renderWorksheetUnits();
+        };
+
+        window.changeWorksheetLevel = function (level, subjectId, unitId) {
+            if (level === 'subjects') {
+                worksheetView = 'subjects';
+                selectedSubjectId = null;
+                selectedUnitId = null;
+                document.getElementById('worksheetBreadcrumb').textContent = 'All subjects';
+                document.getElementById('btnWorksheetBack').style.display = 'none';
+                renderWorksheetSubjects();
+            } else if (level === 'units') {
+                worksheetView = 'units';
+                selectedUnitId = null;
+                document.getElementById('worksheetBreadcrumb').textContent = 'Subject';
+                renderWorksheetSubjects();
+            } else if (level === 'worksheets') {
+                worksheetView = 'worksheets';
+                document.getElementById('worksheetBreadcrumb').textContent = 'Subject / Unit';
+                renderWorksheetSubjects();
+            }
+        };
+
+        window.worksheetBack = function () {
+            if (worksheetView === 'worksheets') {
+                changeWorksheetLevel('units', selectedSubjectId);
+            } else if (worksheetView === 'units') {
+                changeWorksheetLevel('subjects', selectedSubjectId);
+            } else {
+                changeWorksheetLevel('subjects', selectedSubjectId);
+            }
+        };
+
+        async function renderWorksheetSubjects() {
+            const container = document.getElementById('worksheets-list');
+            if (!container) return;
+            try {
+                const subjects = await apiGet('/api/v1/subjects');
+                if (worksheetView === 'subjects') {
+                    if (subjects.length === 0) {
+                        container.innerHTML = '<p style="color: var(--text-muted);">No subjects yet.</p>';
+                        return;
+                    }
+                    container.innerHTML = subjects.map(s => `
+                        <div class="card" style="cursor:pointer;" onclick="openWorksheetSubject(${s.id})">
+                            <div class="card-header">
+                                <div class="lesson-subject">${s.name}</div>
+                            </div>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">${s.description || 'No description'}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                container.innerHTML = '<p style="color: #ef4444;">Failed to load subjects.</p>';
+            }
+        }
+
+        async function renderWorksheetUnits() {
+            const container = document.getElementById('worksheets-list');
+            if (!container) return;
+            try {
+                const units = await apiGet(`/api/v1/subjects/${selectedSubjectId}/units`);
+                const subject = (await apiGet('/api/v1/subjects')).find(s => s.id === selectedSubjectId);
+                document.getElementById('worksheetBreadcrumb').textContent = subject ? subject.name : 'Subject';
+                if (units.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted);">No units yet.</p>';
+                    return;
+                }
+                container.innerHTML = units.map(u => `
+                    <div class="card" style="cursor:pointer;" onclick="openWorksheetUnit(${u.id})">
+                        <div class="card-header">
+                            <div class="lesson-subject">Unit</div>
+                            <div class="lesson-title">${u.name}</div>
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">${u.description || 'No description'}</p>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = '<p style="color: #ef4444;">Failed to load units.</p>';
+            }
+        }
+
+        async function renderWorksheetList() {
+            const container = document.getElementById('worksheets-list');
+            if (!container) return;
+            try {
+                const all = await getWorksheets();
+                const subject = (await apiGet('/api/v1/subjects')).find(s => s.id === selectedSubjectId);
+                const unit = subject ? (await apiGet(`/api/v1/subjects/${selectedSubjectId}/units`)).find(u => u.id === selectedUnitId) : null;
+                document.getElementById('worksheetBreadcrumb').textContent = [subject && subject.name, unit && unit.name].filter(Boolean).join(' / ');
+                const filtered = all.filter(ws => ws.subject_id === selectedSubjectId && ws.unit_id === selectedUnitId);
+                if (filtered.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted);">No worksheets in this unit.</p>';
+                    return;
+                }
+                container.innerHTML = filtered.map(ws => `
+                    <div class="card worksheet-card">
+                        <div class="card-header">
+                            <div>
+                                <div class="lesson-subject">${ws.worksheet_type === 'interactive' ? 'Interactive' : 'Uploaded'}</div>
+                                <div class="lesson-title">${ws.title}</div>
+                                ${ws.subject_name || ws.unit_name ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;">${ws.subject_name || ''}${ws.unit_name ? ' · ' + ws.unit_name : ''}</div>` : ''}
+                            </div>
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;">
+                            ${ws.description || 'No description'}
+                        </p>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            ${ws.worksheet_type === 'uploaded' && ws.file_url ? `<a href="${ws.file_url}" target="_blank" class="btn btn-primary btn-sm">📥 View / Download</a>` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="deleteWorksheetHandler(${ws.id})">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                container.innerHTML = '<p style="color: #ef4444;">Failed to load worksheets.</p>';
+            }
         }
 
         // ─── Render Functions ───

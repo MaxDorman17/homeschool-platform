@@ -1,14 +1,14 @@
 """Dashboard API: aggregated data for parent and child views."""
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_, and_
 from typing import List
 from datetime import date, timedelta
 
 from app.database import get_db
 from app.models import (
     User, ChildProfile, Schedule, ScheduleItem, ProgressRecord,
-    ProgressStatus, QuizResult, WorksheetSubmission, UserRole
+    ProgressStatus, QuizResult, WorksheetSubmission, UserRole, Quiz, Lesson
 )
 from app.schemas import ParentDashboard, ChildDashboard
 from app.auth import get_current_user, require_parent, require_child
@@ -76,8 +76,10 @@ def child_dashboard(
     """Get dashboard data for a child (parent can view any child, child views own)."""
     child = db.query(ChildProfile).filter(
         ChildProfile.id == child_id,
-        (current_user.role == UserRole.CHILD and ChildProfile.user_id == current_user.id) |
-        (current_user.role == UserRole.PARENT and ChildProfile.parent_id == current_user.id)
+        or_(
+            and_(current_user.role == UserRole.CHILD, ChildProfile.user_id == current_user.id),
+            and_(current_user.role == UserRole.PARENT, ChildProfile.parent_id == current_user.id)
+        )
     ).first()
     if not child:
         raise HTTPException(status_code=404, detail="Child not found or unauthorized")
@@ -133,15 +135,90 @@ def child_dashboard(
     # Level progress
     level = calculate_level(child.experience)
     xp_progress = xp_to_next_level(child.experience)
+    
+    # Get total lessons completed
+    total_lessons = db.query(ProgressRecord).filter(
+        ProgressRecord.child_id == child.id,
+        ProgressRecord.status == ProgressStatus.COMPLETED
+    ).count()
+    
+    # Get average quiz score
+    quiz_results = db.query(QuizResult).filter(
+        QuizResult.child_id == child.id
+    ).all()
+    
+    average_quiz_score = 0
+    if quiz_results:
+        average_quiz_score = sum(qr.score for qr in quiz_results) / len(quiz_results)
+    
+    # Get subject progress
+    subject_progress = []
+    if quiz_results:
+        # For simplicity, group all quiz results as 'General'
+        # In a full implementation, you'd link quizzes to subjects
+        total_score = sum(qr.score for qr in quiz_results)
+        avg_score = total_score / len(quiz_results) if quiz_results else 0
+        subject_progress.append({
+            'subject': 'General',
+            'quizzes_taken': len(quiz_results),
+            'average_score': round(avg_score, 1)
+        })
+    
+    # Get recent activity
+    recent_activity = []
+    
+    # Get recent progress records
+    progress_records = db.query(ProgressRecord).filter(
+        ProgressRecord.child_id == child.id
+    ).order_by(ProgressRecord.completed_at.desc()).limit(10).all()
+    
+    for pr in progress_records:
+        if pr.lesson_id:
+            recent_activity.append({
+                'type': 'lesson',
+                'description': f"Completed lesson: {pr.lesson.title if pr.lesson else 'Unknown'}",
+                'points': pr.lesson.points_reward if pr.lesson else 0,
+                'created_at': pr.completed_at or pr.created_at
+            })
+    
+    # Get recent quiz results
+    for qr in quiz_results[:5]:
+        recent_activity.append({
+            'type': 'quiz',
+            'description': f"Completed quiz: {qr.quiz.title if qr.quiz else 'Unknown'}",
+            'points': qr.quiz.points_reward if qr.quiz and qr.passed else (qr.quiz.points_reward // 2 if qr.quiz else 0),
+            'created_at': qr.completed_at
+        })
+    
+    # Get recent worksheet submissions
+    worksheets = db.query(WorksheetSubmission).filter(
+        WorksheetSubmission.child_id == child.id
+    ).order_by(WorksheetSubmission.submitted_at.desc()).limit(5).all()
+    
+    for ws in worksheets:
+        recent_activity.append({
+            'type': 'worksheet',
+            'description': f"Submitted worksheet: {ws.worksheet.title if ws.worksheet else 'Unknown'}",
+            'points': 5,  # Base points for worksheet
+            'created_at': ws.submitted_at
+        })
+    
+    # Sort by created_at descending and limit to 10
+    recent_activity.sort(key=lambda x: x['created_at'], reverse=True)
+    recent_activity = recent_activity[:10]
 
     return ChildDashboard(
         profile=None,  # Would be serialized
-        points_balance=0,
+        points_balance=child.user.points_balance or 0,
         today_lessons=today_lessons,
         pending_worksheets=pending_worksheets,
         pending_quizzes=0,
         recent_badges=[],
         available_rewards=[],
         current_streak=child.current_streak,
-        level_progress=xp_progress
+        level_progress=xp_progress,
+        total_lessons=total_lessons,
+        average_quiz_score=round(average_quiz_score, 1),
+        subject_progress=subject_progress,
+        recent_activity=recent_activity
     )

@@ -415,7 +415,7 @@ class ParentDashboard(BaseModel):
 
 
 class ChildDashboard(BaseModel):
-    profile: ChildProfileResponse
+    profile: Optional[ChildProfileResponse] = None
     points_balance: int
     today_lessons: List[LessonOfDay]
     pending_worksheets: int
@@ -424,6 +424,10 @@ class ChildDashboard(BaseModel):
     available_rewards: List[RewardResponse]
     current_streak: int
     level_progress: float  # XP toward next level
+    total_lessons: int = 0
+    average_quiz_score: float = 0.0
+    subject_progress: List[dict] = []
+    recent_activity: List[dict] = []
 
 
 # ─── Utility Schemas ───

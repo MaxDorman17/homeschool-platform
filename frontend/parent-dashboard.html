@@ -573,6 +573,7 @@
             <a href="#" onclick="showSection('worksheets')">Worksheets</a>
             <a href="#" onclick="showSection('quizzes')">Quizzes</a>
             <a href="#" onclick="showSection('schedules')">Schedules</a>
+            <a href="#" onclick="showSection('progress')">Progress</a>
             <a href="#" onclick="showSection('rewards')">Rewards</a>
             <a href="#" onclick="logout()">Logout</a>
         </div>
@@ -738,6 +739,47 @@
             </div>
             <div id="rewards-list" class="dashboard-grid grid-3">
                 <!-- Rewards will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div id="section-progress" class="section">
+            <div class="section-header">
+                <div>
+                    <h2>Progress & Analytics</h2>
+                    <p>View your children's learning progress and performance.</p>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <select id="progressChildSelect" class="form-control" onchange="renderProgress()">
+                        <option value="">Select child...</option>
+                    </select>
+                    <select id="progressSubject" class="form-control" onchange="renderProgress()">
+                        <option value="">All Subjects</option>
+                        <option value="Math">Math</option>
+                        <option value="Science">Science</option>
+                        <option value="English">English</option>
+                        <option value="History">History</option>
+                        <option value="Art">Art</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid grid-3" id="progress-stats">
+                <!-- Stats will be rendered here -->
+            </div>
+            
+            <div class="card" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Subject Performance</h3>
+                <div id="progress-charts">
+                    <!-- Charts will be rendered here -->
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Recent Activity</h3>
+                <div id="recent-activity">
+                    <!-- Activity will be rendered here -->
+                </div>
             </div>
         </div>
     </div>
@@ -1003,6 +1045,7 @@
             await loadAllData();
             setupFormListeners();
             populateChildDropdown();
+            populateProgressChildDropdown();
         });
 
         async function loadUserData() {
@@ -1090,6 +1133,16 @@
                     plannerSelect.innerHTML += `<option value="${child.id}">${child.full_name}</option>`;
                 });
             }
+        }
+
+        function populateProgressChildDropdown() {
+            const select = document.getElementById('progressChildSelect');
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">Select child...</option>';
+            children.forEach(child => {
+                select.innerHTML += `<option value="${child.id}">${child.full_name}</option>`;
+            });
         }
 
         // ─── Weekly Planner Functions ───
@@ -1344,8 +1397,22 @@
                 }
 
                 try {
-                    await createWorksheet(data);
-                    showToast('Worksheet created successfully!');
+                    const ws = await createWorksheet(data);
+                    
+                    // If uploaded type and file selected, upload the file
+                    if (type === 'uploaded') {
+                        const fileInput = document.getElementById('worksheetFile');
+                        if (fileInput.files.length > 0) {
+                            const file = fileInput.files[0];
+                            const uploadResult = await uploadWorksheetFile(ws.id, file);
+                            showToast('Worksheet created and file uploaded successfully!');
+                        } else {
+                            showToast('Worksheet created successfully!');
+                        }
+                    } else {
+                        showToast('Worksheet created successfully!');
+                    }
+                    
                     closeModal('addWorksheetModal');
                     document.getElementById('addWorksheetForm').reset();
                     await loadAllData();
@@ -1742,7 +1809,81 @@
             document.getElementById('scheduleItems').insertAdjacentHTML('beforeend', html);
         };
 
-        // ─── Logout ───
+        // ─── Progress Rendering ───
+        async function renderProgress() {
+            const childSelect = document.getElementById('progressChildSelect');
+            const subjectSelect = document.getElementById('progressSubject');
+            const selectedChildId = childSelect.value;
+            const selectedSubject = subjectSelect.value;
+            
+            if (!selectedChildId) {
+                document.getElementById('progress-stats').innerHTML = '<p style="color: var(--text-muted);">Please select a child to view progress.</p>';
+                document.getElementById('progress-charts').innerHTML = '';
+                document.getElementById('recent-activity').innerHTML = '';
+                return;
+            }
+            
+            try {
+                // Get child dashboard data
+                const dashboardData = await getChildDashboard(parseInt(selectedChildId));
+                
+                // Update stats
+                document.getElementById('progress-stats').innerHTML = `
+                    <div class="card stat-card">
+                        <div class="stat-value">${dashboardData.total_lessons || 0}</div>
+                        <div class="stat-label">Lessons Completed</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value">${dashboardData.average_quiz_score || 0}%</div>
+                        <div class="stat-label">Average Quiz Score</div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-value">${dashboardData.streak || 0} days</div>
+                        <div class="stat-label">Current Streak</div>
+                    </div>
+                `;
+                
+                // Render subject performance
+                if (dashboardData.subject_progress) {
+                    const subjects = dashboardData.subject_progress;
+                    document.getElementById('progress-charts').innerHTML = subjects.map(subject => `
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="font-weight: 600;">${subject.subject}</span>
+                                <span style="color: var(--fun-accent);">${subject.average_score || 0}%</span>
+                            </div>
+                            <div style="background: var(--border); height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #8b5cf6, #06b6d4); height: 100%; width: ${subject.average_score || 0}%; transition: width 0.5s ease;"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('progress-charts').innerHTML = '<p style="color: var(--text-muted);">No progress data available yet.</p>';
+                }
+                
+                // Render recent activity
+                const activities = dashboardData.recent_activity || [];
+                if (activities.length > 0) {
+                    document.getElementById('recent-activity').innerHTML = activities.map(activity => `
+                        <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border);">
+                            <div style="font-size: 1.5rem;">${activity.type === 'lesson' ? '📚' : activity.type === 'quiz' ? '🧠' : activity.type === 'worksheet' ? '📝' : '⭐'}</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">${activity.description}</div>
+                                <div style="color: var(--text-muted); font-size: 0.875rem;">${new Date(activity.created_at).toLocaleDateString()}</div>
+                            </div>
+                            <div style="color: var(--fun-accent); font-weight: 600;">+${activity.points || 0} pts</div>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('recent-activity').innerHTML = '<p style="color: var(--text-muted);">No recent activity. Start learning!</p>';
+                }
+            } catch (err) {
+                console.error('Failed to load progress:', err);
+                showToast('Failed to load progress data', 'error');
+            }
+        }
+
+        // ─── Initialization ───
         window.logout = logout;
     </script>
 </body>

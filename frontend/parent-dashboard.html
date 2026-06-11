@@ -1098,7 +1098,13 @@
             // Load worksheets
             try {
                 worksheets = await getWorksheets();
-                renderWorksheets();
+                worksheetView = 'subjects';
+                selectedSubjectId = null;
+                selectedUnitId = null;
+                document.getElementById('worksheetBreadcrumb').textContent = 'All subjects';
+                const backBtn = document.getElementById('btnWorksheetBack');
+                if (backBtn) backBtn.style.display = 'none';
+                renderWorksheetSubjects();
             } catch (err) {
                 console.error('Failed to load worksheets:', err);
             }

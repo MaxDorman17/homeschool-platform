@@ -1596,6 +1596,7 @@
                         ${ws.description || 'No description'}
                     </p>
                     <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        ${ws.worksheet_type === 'uploaded' && ws.file_url ? `<a href="${ws.file_url}" target="_blank" class="btn btn-primary btn-sm">📥 View / Download</a>` : ''}
                         <button class="btn btn-danger btn-sm" onclick="deleteWorksheetHandler(${ws.id})">Delete</button>
                     </div>
                 </div>

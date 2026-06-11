@@ -8,7 +8,7 @@ from app.config import get_settings
 from app.database import get_db
 from app.models import User, Worksheet, UserRole, WorksheetType
 from app.schemas import WorksheetCreate, WorksheetResponse
-from app.auth import get_current_user, require_parent
+from app.auth import get_current_user, require_parent, require_child
 
 settings = get_settings()
 router = APIRouter(prefix="/api/v1/worksheets", tags=["Worksheets"])
@@ -146,3 +146,48 @@ def delete_worksheet(
     db.delete(ws)
     db.commit()
     return None
+
+
+@router.post("/{worksheet_id}/submit", response_model=dict)
+def submit_worksheet(
+    worksheet_id: int,
+    current_user: User = Depends(require_child),
+    db: Session = Depends(get_db)
+):
+    """Submit worksheet answers."""
+    from app.models import ChildProfile, WorksheetSubmission, Worksheet
+    from app.schemas import WorksheetSubmissionCreate
+    
+    # Get worksheet
+    ws = db.query(Worksheet).filter(Worksheet.id == worksheet_id).first()
+    if not ws:
+        raise HTTPException(status_code=404, detail="Worksheet not found")
+    
+    # Get child
+    child = db.query(ChildProfile).filter(ChildProfile.user_id == current_user.id).first()
+    if not child:
+        raise HTTPException(status_code=404, detail="Child profile not found")
+    
+    # Create submission (empty for now, answers stored in database)
+    submission = WorksheetSubmission(
+        child_id=child.id,
+        worksheet_id=worksheet_id,
+        answers=None  # Would store JSON answers
+    )
+    db.add(submission)
+    
+    # Award points for submission
+    points = 5  # Base points for submission
+    from app.services.gamification import add_points, update_streak, check_and_award_badges
+    
+    tx = add_points(db, child.id, points, "Worksheet submitted")
+    update_streak(db, child.id)
+    check_and_award_badges(db, child.id)
+    
+    db.commit()
+    
+    return {
+        "message": "Worksheet submitted successfully",
+        "points_earned": points,
+        "total_points": current_user.points_balance or 0
+    }

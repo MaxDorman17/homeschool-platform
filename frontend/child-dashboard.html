@@ -656,8 +656,8 @@
         }
 
         function startLesson(lessonId, lessonName) {
-            showToast(`Starting "${lessonName}"... 🚀`, 'success');
-            // In a full app, this would open the lesson content
+            // Navigate to lesson detail page
+            window.location.href = `lesson.html?id=${lessonId}`;
         }
 
         function startQuiz(quizId, quizName) {

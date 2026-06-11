@@ -161,3 +161,69 @@ def mark_complete(
         completed_at=progress.completed_at,
         notes=progress.notes
     )
+
+
+@router.post("/{lesson_id}/complete", response_model=dict)
+def complete_lesson(
+    lesson_id: int,
+    current_user: User = Depends(require_child),
+    db: Session = Depends(get_db)
+):
+    """Complete a lesson and award points."""
+    from app.models import ChildProfile, Schedule, ScheduleItem, QuizResult
+    from datetime import date
+    from app.schemas import ProgressResponse
+
+    child = db.query(ChildProfile).filter(ChildProfile.user_id == current_user.id).first()
+    if not child:
+        raise HTTPException(status_code=404, detail="Child profile not found")
+
+    # Find the lesson
+    lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+
+    # Check if already completed today
+    today = date.today()
+    existing = db.query(ProgressRecord).filter(
+        ProgressRecord.child_id == child.id,
+        ProgressRecord.lesson_id == lesson_id,
+        ProgressRecord.status == ProgressStatus.COMPLETED,
+        ProgressRecord.completed_at >= today
+    ).first()
+
+    if existing:
+        return {
+            "message": "Already completed today",
+            "points_earned": 0,
+            "total_points": current_user.points_balance or 0
+        }
+
+    # Create progress record
+    progress = ProgressRecord(
+        child_id=child.id,
+        lesson_id=lesson_id,
+        status=ProgressStatus.COMPLETED,
+        completed_at=today
+    )
+    db.add(progress)
+
+    # Award points
+    points = lesson.points_reward or 10
+    tx = add_points(db, child.id, points, "Lesson completed")
+    
+    # Update streak
+    streak_updated = update_streak(db, child.id)
+    
+    # Check badges
+    new_badges = check_and_award_badges(db, child.id)
+
+    db.commit()
+
+    return {
+        "message": "Lesson completed successfully",
+        "points_earned": points,
+        "total_points": current_user.points_balance or 0,
+        "streak": streak_updated,
+        "new_badges": new_badges
+    }

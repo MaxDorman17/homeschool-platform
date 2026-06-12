@@ -17,3 +17,9 @@ uploads/
 
 # Env
 .env
+.env.local
+
+# Node
+node_modules/
+.next/
+npm-debug.log*

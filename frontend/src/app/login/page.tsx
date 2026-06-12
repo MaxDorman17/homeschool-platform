@@ -59,7 +59,20 @@ export default function LoginPage() {
     try {
       await login(username, password)
       toast.success('Welcome back! 🎉')
-      router.push('/dashboard')
+      // Redirect based on role - the auth context will have updated
+      const userStr = localStorage.getItem('user')
+      if (userStr) {
+        const user = JSON.parse(userStr)
+        if (user.role === 'parent') {
+          router.push('/dashboard/parent')
+        } else if (user.role === 'child') {
+          router.push('/dashboard/child')
+        } else {
+          router.push('/dashboard')
+        }
+      } else {
+        router.push('/dashboard')
+      }
     } catch (error: any) {
       const message =
         error?.response?.data?.detail ||

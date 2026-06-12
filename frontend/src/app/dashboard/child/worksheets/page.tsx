@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   FileType,
   Image,
+  Zap,
 } from 'lucide-react'
 
 export default function ChildWorksheetsPage() {
@@ -106,6 +107,10 @@ export default function ChildWorksheetsPage() {
                         {ws?.file_size && (
                           <span>{Math.round(ws.file_size / 1024)}KB</span>
                         )}
+                        <span className="flex items-center gap-1 text-amber-500 ml-auto">
+                          <Zap className="h-3 w-3" />
+                          20 XP
+                        </span>
                       </div>
 
                       <div className="flex gap-2 pt-2">

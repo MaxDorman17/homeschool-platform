@@ -285,8 +285,10 @@ export default function ParentDashboard() {
                     >
                       <Avatar className="h-10 w-10 ring-2 ring-primary/20">
                         <AvatarImage src={child.child?.avatar_url} alt={child.child?.display_name} />
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                          {child.child?.display_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || '?'}
+                        <AvatarFallback className="bg-primary/10 text-primary text-lg">
+                          {child.child?.avatar_url && child.child.avatar_url.match(/[👦👧🧒👨‍🎓👩‍🎓🎨🧪🔭📚🎵🌍💻🤖🐶🐱🦊🐼🦄🌟🚀🌈🧑‍🏫]/)
+                            ? child.child.avatar_url
+                            : child.child?.display_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || '?'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">

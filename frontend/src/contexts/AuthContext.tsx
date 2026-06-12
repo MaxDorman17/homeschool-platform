@@ -52,6 +52,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('access_token', data.access_token)
     localStorage.setItem('refresh_token', data.refresh_token)
     localStorage.setItem('user', JSON.stringify(data.user))
+    // Set cookie for middleware (server-side auth check)
+    document.cookie = `access_token=${data.access_token}; path=/; max-age=${60*60*24}; SameSite=Lax`
+    document.cookie = `user=${JSON.stringify(data.user)}; path=/; max-age=${60*60*24}; SameSite=Lax`
     setUser(data.user)
   }
 
@@ -60,6 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('access_token', data.access_token)
     localStorage.setItem('refresh_token', data.refresh_token)
     localStorage.setItem('user', JSON.stringify(data.user))
+    document.cookie = `access_token=${data.access_token}; path=/; max-age=${60*60*24}; SameSite=Lax`
+    document.cookie = `user=${JSON.stringify(data.user)}; path=/; max-age=${60*60*24}; SameSite=Lax`
     setUser(data.user)
   }
 
@@ -67,6 +72,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
+    // Clear auth cookies
+    document.cookie = 'access_token=; path=/; max-age=0'
+    document.cookie = 'user=; path=/; max-age=0'
     setUser(null)
     router.push('/login')
   }

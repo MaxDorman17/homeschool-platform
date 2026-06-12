@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "./uploads"
     MAX_UPLOAD_SIZE: int = 50 * 1024 * 1024  # 50MB
 
-    OAK_API_BASE_URL: str = "https://api.thenational.academy/v1"
+    OAK_API_KEY: str = ""
+    OAK_API_BASE_URL: str = "https://open-api.thenational.academy/api/v0"
     CORS_ORIGINS: str = "*"
     ENV: str = "development"
     DEBUG: bool = True

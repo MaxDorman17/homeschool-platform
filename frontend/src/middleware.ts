@@ -14,8 +14,18 @@ const childRoutes = ['/dashboard/child']
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Check for auth token in cookie
+  const accessToken = request.cookies.get('access_token')?.value
+  const authHeader = request.headers.get('authorization')
+  const isAuthenticated = !!accessToken || !!authHeader
+
   // Allow public routes
   if (publicRoutes.some(route => pathname.startsWith(route))) {
+    // If already authenticated and trying to access login, redirect to dashboard
+    if (isAuthenticated && (pathname === '/login' || pathname === '/register')) {
+      const redirectUrl = request.nextUrl.searchParams.get('redirect') || '/dashboard'
+      return NextResponse.redirect(new URL(redirectUrl, request.url))
+    }
     return NextResponse.next()
   }
 
@@ -31,15 +41,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Check for auth token
-  const accessToken = request.cookies.get('access_token')?.value
-  const authHeader = request.headers.get('authorization')
-  const isAuthenticated = !!accessToken || !!authHeader
-
   if (!isAuthenticated) {
-    // Check localStorage isn't possible in middleware (server-side),
-    // so we redirect to login. The client-side auth context will handle
-    // the actual redirect after hydration.
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)

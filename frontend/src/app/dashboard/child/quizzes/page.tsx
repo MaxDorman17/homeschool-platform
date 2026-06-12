@@ -24,6 +24,7 @@ import {
   ArrowLeft,
   Sparkles,
   Target,
+  Zap,
 } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -292,6 +293,10 @@ export default function ChildQuizzesPage() {
                         {quiz?.time_limit_minutes > 0 && (
                           <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {quiz.time_limit_minutes} min</span>
                         )}
+                        <span className="flex items-center gap-1 text-amber-500">
+                          <Zap className="h-3 w-3" />
+                          30 XP
+                        </span>
                         <Badge className={`text-xs ${DIFFICULTY_COLORS[quiz?.difficulty] || DIFFICULTY_COLORS.beginner}`}>
                           {quiz?.difficulty}
                         </Badge>

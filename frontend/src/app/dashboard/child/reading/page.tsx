@@ -30,6 +30,7 @@ import {
   Flame,
   TrendingUp,
   Calendar,
+  Zap,
 } from 'lucide-react'
 import { format } from 'date-fns'
 

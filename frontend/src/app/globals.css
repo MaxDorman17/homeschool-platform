@@ -471,6 +471,224 @@
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08));
 }
 
+/* === New Gradient Backgrounds === */
+.bg-gradient-rainbow {
+  background: linear-gradient(135deg, #ef4444, #f59e0b, #22c55e, #3b82f6, #8b5cf6, #ec4899);
+  background-size: 200% 200%;
+  animation: streak-gradient 6s ease infinite;
+}
+
+.bg-gradient-sunset {
+  background: linear-gradient(135deg, #f97316, #ef4444, #db2777, #7c3aed);
+}
+
+.bg-gradient-ocean {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6, #6366f1, #8b5cf6);
+}
+
+.bg-gradient-forest {
+  background: linear-gradient(135deg, #22c55e, #16a34a, #15803d, #065f46);
+}
+
+.bg-gradient-magic {
+  background: linear-gradient(135deg, #d946ef, #8b5cf6, #6366f1, #06b6d4);
+  background-size: 200% 200%;
+  animation: streak-gradient 4s ease infinite;
+}
+
+.bg-gradient-cosmic {
+  background: linear-gradient(135deg, #0f172a, #1e293b, #334155, #0f766e, #6366f1);
+}
+
+.bg-gradient-aurora {
+  background: linear-gradient(135deg, #059669, #06b6d4, #8b5cf6, #ec4899);
+  background-size: 200% 200%;
+  animation: streak-gradient 5s ease infinite;
+}
+
+/* === New Animations === */
+
+/* XP Bounce */
+@keyframes xp-bounce {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-8px) scale(1.05); }
+  50% { transform: translateY(0) scale(1); }
+  75% { transform: translateY(-4px) scale(1.02); }
+}
+
+/* XP Pulse Glow */
+@keyframes xp-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--xp-gold), 0 0 10px rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--xp-gold), 0 0 40px rgba(251, 191, 36, 0.5), 0 0 60px rgba(251, 191, 36, 0.2);
+  }
+}
+
+/* Rainbow Border Animation */
+@keyframes rainbow-border {
+  0% { border-color: #ef4444; }
+  14% { border-color: #f59e0b; }
+  28% { border-color: #eab308; }
+  42% { border-color: #22c55e; }
+  57% { border-color: #06b6d4; }
+  71% { border-color: #3b82f6; }
+  85% { border-color: #8b5cf6; }
+  100% { border-color: #ef4444; }
+}
+
+@keyframes rainbow-shadow {
+  0% { box-shadow: 0 0 8px #ef4444; }
+  14% { box-shadow: 0 0 8px #f59e0b; }
+  28% { box-shadow: 0 0 8px #eab308; }
+  42% { box-shadow: 0 0 8px #22c55e; }
+  57% { box-shadow: 0 0 8px #06b6d4; }
+  71% { box-shadow: 0 0 8px #3b82f6; }
+  85% { box-shadow: 0 0 8px #8b5cf6; }
+  100% { box-shadow: 0 0 8px #ef4444; }
+}
+
+/* Level-up Fire Animation */
+@keyframes level-up-fire {
+  0% {
+    box-shadow: 0 0 5px #f97316, 0 0 10px #ef4444;
+    transform: scale(1);
+  }
+  25% {
+    box-shadow: 0 0 15px #f97316, 0 0 30px #ef4444, 0 0 45px #dc2626;
+    transform: scale(1.08);
+  }
+  50% {
+    box-shadow: 0 0 25px #f59e0b, 0 0 50px #f97316, 0 0 75px #ef4444;
+    transform: scale(1.15);
+  }
+  75% {
+    box-shadow: 0 0 15px #f97316, 0 0 30px #ef4444, 0 0 45px #dc2626;
+    transform: scale(1.08);
+  }
+  100% {
+    box-shadow: 0 0 5px #f97316, 0 0 10px #ef4444;
+    transform: scale(1);
+  }
+}
+
+@keyframes fire-particles {
+  0% {
+    background-position: 0% 100%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 0% 0%;
+    opacity: 0;
+  }
+}
+
+/* Badge Shimmer / Glow */
+@keyframes badge-glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 24px rgba(251, 191, 36, 0.3));
+  }
+}
+
+/* Card Hover Lift - Enhanced */
+.card-hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.15), 0 6px 12px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Subject Color Dots with Glow */
+.subject-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.subject-dot-glow {
+  animation: subject-dot-glow 2s ease-in-out infinite;
+}
+
+@keyframes subject-dot-glow {
+  0%, 100% {
+    box-shadow: 0 0 4px currentColor;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 12px currentColor, 0 0 20px currentColor;
+    transform: scale(1.2);
+  }
+}
+
+/* === Animation Utility Classes === */
+.animate-xp-bounce {
+  animation: xp-bounce 1s ease-in-out;
+}
+
+.animate-xp-pulse-glow {
+  animation: xp-pulse-glow 1.5s ease-in-out infinite;
+}
+
+.animate-rainbow-border {
+  animation: rainbow-border 3s linear infinite;
+}
+
+.animate-rainbow-shadow {
+  animation: rainbow-shadow 3s linear infinite;
+}
+
+.animate-level-up-fire {
+  animation: level-up-fire 1.5s ease-in-out infinite;
+}
+
+.animate-badge-glow {
+  animation: badge-glow-pulse 2s ease-in-out infinite;
+}
+
+/* ===== Custom Scrollbar for the whole page ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--xp-blue), var(--xp-purple));
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--xp-gold), var(--xp-purple));
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--xp-blue), var(--xp-purple));
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--xp-blue) transparent;
+}
+
 /* Smooth Page Transitions */
 .page-enter {
   animation: fade-in 0.3s ease-out;

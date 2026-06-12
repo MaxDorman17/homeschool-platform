@@ -50,12 +50,26 @@ export default function RewardsManagement() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingConfig, setEditingConfig] = useState<any>(null)
   const [form, setForm] = useState({
-    target_percentage: 80,
-    reward_amount: 10,
+    target_percentage: 75,
+    reward_amount: 30,
     reward_type: 'monthly' as string,
     reward_name: '',
     is_active: true,
   })
+
+  const getTieredReward = (completionPct: number) => {
+    if (completionPct >= 90) return 40
+    if (completionPct >= 75) return 30
+    if (completionPct >= 50) return 15
+    return 0
+  }
+
+  const TIERS = [
+    { range: '0-49%', amount: '$0', color: 'text-red-500', label: 'No reward' },
+    { range: '50-74%', amount: '$15', color: 'text-yellow-500', label: 'Half reward' },
+    { range: '75-89%', amount: '$30', color: 'text-green-500', label: 'Full reward' },
+    { range: '90-100%', amount: '$40', color: 'text-emerald-500', label: 'Bonus tier! 🎉' },
+  ]
 
   const { data: childrenData } = useQuery({
     queryKey: ['children'],
@@ -136,8 +150,8 @@ export default function RewardsManagement() {
   const openCreate = () => {
     setEditingConfig(null)
     setForm({
-      target_percentage: 80,
-      reward_amount: 10,
+      target_percentage: 75,
+      reward_amount: 30,
       reward_type: 'monthly',
       reward_name: '',
       is_active: true,
@@ -325,8 +339,42 @@ export default function RewardsManagement() {
                         <div className="rounded-lg border bg-green-50 dark:bg-green-950/20 p-4 text-center">
                           <p className="text-sm text-muted-foreground">Projected Reward</p>
                           <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                            ${currentData.projected_reward || currentData.reward_earned || 0}
+                            ${getTieredReward(currentData.completion_percentage || 0)}
                           </p>
+                          {(currentData.completion_percentage || 0) >= 75 ? (
+                            <Badge className="mt-1 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                              ✅ Full reward unlocked!
+                            </Badge>
+                          ) : (currentData.completion_percentage || 0) >= 50 ? (
+                            <Badge className="mt-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
+                              ⚡ Half reward available
+                            </Badge>
+                          ) : (
+                            <p className="mt-1 text-xs text-muted-foreground">Need 50%+ to unlock reward</p>
+                          )}
+                        </div>
+
+                        {/* Tiered Rewards Explanation */}
+                        <div className="rounded-lg border p-4">
+                          <p className="text-sm font-medium mb-3">Reward Tiers</p>
+                          <div className="space-y-2">
+                            {TIERS.map((tier) => (
+                              <div key={tier.range} className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2">
+                                  <span className={`w-3 h-3 rounded-full ${
+                                    tier.amount === '$0' ? 'bg-red-400' :
+                                    tier.amount === '$15' ? 'bg-yellow-400' :
+                                    tier.amount === '$30' ? 'bg-green-400' :
+                                    'bg-emerald-400'
+                                  }`} />
+                                  <span>{tier.range}</span>
+                                </div>
+                                <span className={`font-semibold ${tier.color}`}>
+                                  {tier.amount} {tier.label && <span className="text-xs text-muted-foreground font-normal">— {tier.label}</span>}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     ) : (

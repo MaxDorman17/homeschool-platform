@@ -23,6 +23,7 @@ import {
   ChevronRight,
   AlertCircle,
   Target,
+  Zap,
 } from 'lucide-react'
 import Link from 'next/link'
 import { format, startOfWeek, endOfWeek, isSameDay } from 'date-fns'
@@ -279,6 +280,10 @@ export default function ChildLessonsPage() {
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
                   {assignment.lesson?.duration_minutes}m
+                </span>
+                <span className="flex items-center gap-1 text-amber-500">
+                  <Zap className="h-3 w-3" />
+                  50 XP
                 </span>
                 <Badge className={`text-xs ${DIFFICULTY_COLORS[assignment.lesson?.difficulty] || DIFFICULTY_COLORS.beginner}`}>
                   {assignment.lesson?.difficulty}

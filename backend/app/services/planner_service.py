@@ -9,6 +9,78 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.models import PlannerEntry, LessonAssignment
 
 
+async def generate_default_schedule(
+    db: AsyncSession,
+    child_id: UUID,
+    week_start: Optional[date] = None,
+    lesson_assignment_id: Optional[UUID] = None,
+) -> List[PlannerEntry]:
+    """Generate a default weekly schedule for a child.
+    
+    Mon-Thu: 5 slots at 9:00, 10:00, 11:00, 13:00, 14:00
+    Fri: 3 slots at 9:00, 10:00, 11:00
+    """
+    if week_start is None:
+        today = date.today()
+        # Find the Monday of the current week
+        week_start = today - timedelta(days=today.weekday())
+    
+    created_entries = []
+    
+    # Define schedule: (day_offset, [(slot_number, title, entry_type)])
+    slots_by_day = {
+        0: [(1, "Morning Lesson 1", "lesson"), (2, "Morning Lesson 2", "lesson"),
+            (3, "Morning Break", "break"), (4, "Afternoon Lesson 1", "lesson"),
+            (5, "Afternoon Lesson 2", "lesson")],
+        1: [(1, "Morning Lesson 1", "lesson"), (2, "Morning Lesson 2", "lesson"),
+            (3, "Morning Break", "break"), (4, "Afternoon Lesson 1", "lesson"),
+            (5, "Afternoon Lesson 2", "lesson")],
+        2: [(1, "Morning Lesson 1", "lesson"), (2, "Morning Lesson 2", "lesson"),
+            (3, "Morning Break", "break"), (4, "Afternoon Lesson 1", "lesson"),
+            (5, "Afternoon Lesson 2", "lesson")],
+        3: [(1, "Morning Lesson 1", "lesson"), (2, "Morning Lesson 2", "lesson"),
+            (3, "Morning Break", "break"), (4, "Afternoon Lesson 1", "lesson"),
+            (5, "Afternoon Lesson 2", "lesson")],
+        4: [(1, "Morning Lesson 1", "lesson"), (2, "Morning Lesson 2", "lesson"),
+            (3, "Morning Break", "break")],
+    }
+    
+    for day_offset, slots in slots_by_day.items():
+        current_date = week_start + timedelta(days=day_offset)
+        
+        for slot_number, default_title, entry_type in slots:
+            # Check if slot already exists
+            existing = await db.execute(
+                select(PlannerEntry).where(
+                    and_(
+                        PlannerEntry.child_id == child_id,
+                        PlannerEntry.date == current_date,
+                        PlannerEntry.slot_number == slot_number,
+                    )
+                )
+            )
+            if existing.scalar_one_or_none():
+                continue
+            
+            entry = PlannerEntry(
+                child_id=child_id,
+                date=current_date,
+                slot_number=slot_number,
+                lesson_assignment_id=lesson_assignment_id,
+                title=default_title if not lesson_assignment_id else None,
+                entry_type=entry_type,
+                is_recurring=True,
+            )
+            db.add(entry)
+            created_entries.append(entry)
+    
+    await db.commit()
+    for entry in created_entries:
+        await db.refresh(entry)
+    
+    return created_entries
+
+
 async def get_daily_plan(db: AsyncSession, child_id: UUID, plan_date: date) -> List[PlannerEntry]:
     result = await db.execute(
         select(PlannerEntry)

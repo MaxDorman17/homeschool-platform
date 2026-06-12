@@ -21,6 +21,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { AvatarPicker } from '@/components/ui/AvatarPicker'
 import {
   Users,
   Plus,
@@ -40,6 +41,7 @@ interface ChildFormData {
   date_of_birth: string
   grade_level: string
   is_active: boolean
+  avatar_url: string
 }
 
 const defaultForm: ChildFormData = {
@@ -49,6 +51,7 @@ const defaultForm: ChildFormData = {
   date_of_birth: '',
   grade_level: '',
   is_active: true,
+  avatar_url: '👦',
 }
 
 export default function ChildrenManagement() {
@@ -118,6 +121,7 @@ export default function ChildrenManagement() {
       date_of_birth: child.date_of_birth ? child.date_of_birth.split('T')[0] : '',
       grade_level: child.grade_level || '',
       is_active: child.is_active ?? true,
+      avatar_url: child.avatar_url || '👦',
     })
     setDialogOpen(true)
   }
@@ -353,6 +357,13 @@ export default function ChildrenManagement() {
                       onChange={(e) => setForm({ ...form, grade_level: e.target.value })}
                     />
                   </div>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <AvatarPicker
+                    value={form.avatar_url}
+                    onChange={(avatar) => setForm({ ...form, avatar_url: avatar })}
+                    avatars={['👦','👧','🧒','👨‍🎓','👩‍🎓','🎨','🧪','🔭','📚','🎵','🌍','💻','🤖','🐶','🐱','🦊','🐼','🦄']}
+                  />
                 </div>
                 <div className="flex items-center justify-between rounded-lg border p-3">
                   <div>

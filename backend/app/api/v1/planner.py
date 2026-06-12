@@ -15,6 +15,28 @@ from app.services import planner_service as svc
 router = APIRouter(prefix="/planner", tags=["planner"])
 
 
+@router.post("/generate-default", response_model=List[PlannerEntryResponse], status_code=status.HTTP_201_CREATED)
+async def generate_default_schedule(
+    child_id: UUID = Query(...),
+    lesson_assignment_id: Optional[UUID] = Query(None),
+    week_start: Optional[date] = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Generate a default weekly schedule for a child.
+    
+    Mon-Thu: 5 slots at 9:00, 10:00, 11:00, 13:00, 14:00
+    Fri: 3 slots at 9:00, 10:00, 11:00
+    """
+    entries = await svc.generate_default_schedule(
+        db,
+        child_id=child_id,
+        week_start=week_start,
+        lesson_assignment_id=lesson_assignment_id,
+    )
+    return [PlannerEntryResponse.model_validate(e) for e in entries]
+
+
 @router.get("/daily", response_model=List[PlannerEntryResponse])
 async def get_daily_plan(
     child_id: UUID = Query(...),

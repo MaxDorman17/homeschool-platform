@@ -21,26 +21,75 @@ async def get_oak_subjects(
     return {"subjects": subjects}
 
 
-@router.get("/units")
-async def get_oak_units(
-    subject: str = Query(...),
+@router.get("/subjects/{subject}")
+async def get_oak_subject_detail(
+    subject: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    units = await svc.get_curriculum_units(db, current_user.id, subject)
+    detail = await svc.get_subject_detail(db, current_user.id, subject)
+    if detail is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subject not found")
+    return detail
+
+
+@router.get("/units")
+async def get_oak_units(
+    key_stage: str = Query(...),
+    subject: str = Query(...),
+    year: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    units = await svc.get_curriculum_units(db, current_user.id, subject, key_stage=key_stage, year=year)
     return {"units": units}
 
 
 @router.get("/lessons")
 async def get_oak_lessons(
-    subject: Optional[str] = Query(None),
-    unit: Optional[str] = Query(None),
+    key_stage: str = Query(...),
+    subject: str = Query(...),
     year: Optional[str] = Query(None),
+    unit: Optional[str] = Query(None),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    lessons = await svc.search_lessons(db, current_user.id, subject, unit, year)
+    lessons = await svc.search_lessons(db, current_user.id, subject, unit, year, key_stage=key_stage)
     return {"lessons": lessons}
+
+
+@router.get("/lessons/{lesson_slug}/summary")
+async def get_oak_lesson_summary(
+    lesson_slug: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    summary = await svc.get_lesson_summary(db, current_user.id, lesson_slug)
+    if summary is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson not found")
+    return summary
+
+
+@router.get("/lessons/{lesson_slug}/quiz")
+async def get_oak_lesson_quiz(
+    lesson_slug: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    quiz = await svc.get_lesson_quiz(db, current_user.id, lesson_slug)
+    if quiz is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found for this lesson")
+    return quiz
+
+
+@router.get("/search")
+async def search_oak_lessons(
+    q: str = Query(..., description="Search query for lesson title"),
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    results = await svc.search_lessons_by_title(db, current_user.id, q)
+    return {"results": results}
 
 
 @router.post("/import/lesson", status_code=status.HTTP_201_CREATED)

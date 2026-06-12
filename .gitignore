@@ -23,3 +23,5 @@ uploads/
 node_modules/
 .next/
 npm-debug.log*
+scripts/cloudflare_dns.py
+scripts/check_dns.py
